@@ -1,0 +1,39 @@
+NationsBenefits.
+AI/ML Engineer
+Hyderabad, Telangana, India.
+
+Job Title: AI/ML Engineer
+
+Experience: 4-6 Years
+
+Location: Hyderabad, India
+
+Employment Type: Full-time
+
+About NationsBenefits:
+
+At NationsBenefits, we are leading the transformation of the insurance industry by developing innovative benefits management solutions. We focus on modernizing complex back-office systems to create scalable, secure, and high-performing platforms that streamline operations for our clients. As part of our strategic growth, we are focused on platform modernization — transitioning legacy systems to modern, cloud-native architectures that support the scalability, reliability, and high performance of core backoffice functions in the insurance domain.
+
+Role Summary:
+
+We are hiring an AI/ML Engineer with 4-6 years of hands-on experience in building and deploying AI/ML solutions.
+
+The candidate should have strong practical exposure to model development, deployment, monitoring, and scalable AI
+
+systems
+
+Key Responsibilities:
+
+ Develop and deploy AI/ML and Generative AI solutions for enterprise use cases. 
+ Build and maintain end-to-end ML pipelines from training to production deployment. 
+ Implement monitoring, observability, and performance tracking for AI systems. 
+ Work with APIs, vector databases, embeddings, and RAG-based applications. 
+ Collaborate with cross-functional teams to optimize scalable AI deployments. 
+
+Required Skills & Qualifications:
+
+ Hands-on experience in Machine Learning, Deep Learning, and Generative AI. 
+ Strong Python, SQL, API development, and ML framework knowledge. 
+ Experience with MLOps, CI/CD pipelines, Docker, Kubernetes, and MLflow. 
+ Understanding of observability, monitoring, logging, and model drift detection. 
+ Experience with Azure Cloud Stack is a plus

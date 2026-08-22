@@ -1,0 +1,103 @@
+{
+  "next_id": 20,
+  "jobs": {
+    "pop3-2": {
+      "message_id": "pop3-2",
+      "subject": "Your application to Acme Corp",
+      "sender": "Acme Corp Talent Team <talent@acme-corp.com>",
+      "date": "2026-08-14 16:48",
+      "category": "not_job_related",
+      "hidden": true
+    },
+    "pop3-1": {
+      "message_id": "pop3-1",
+      "subject": "Exciting Data Engineer opportunity",
+      "sender": "Priya Sharma <priya@nimbus-analytics.io>",
+      "date": "2026-08-14 16:48",
+      "category": "not_job_related",
+      "hidden": true
+    },
+    "<ab3adc45b304458ba97d42a5f0f73e86@demo-job-tracker.com>": {
+      "id": "JOB-017",
+      "message_id": "<ab3adc45b304458ba97d42a5f0f73e86@demo-job-tracker.com>",
+      "sig": "6f2b36fb90a891bd9ff37f866833eb51e2fe0842",
+      "subject": "You've been selected for the role of automation engineer in Apple Inc, USA.",
+      "sender": "Apple@Inc.com",
+      "date": "2026-08-17 11:44",
+      "category": "cold_offer",
+      "company_name": "Apple Inc",
+      "job_role": "Automation Engineer",
+      "summary": "Apple Inc. is a global technology company known for its consumer electronics and software services. The Automation Engineer role focuses on developing and implementing technical systems to improve efficiency and software quality within the organization.",
+      "mail_summary": "Apple Inc. is offering you an interview for the Automation Engineer position on August 20, 2026, to discuss the role and salary package.",
+      "next_step": "Reply to the email to confirm the interview time or request a reschedule if needed.",
+      "notes": "",
+      "edited": {
+        "company_name": "Apple Inc",
+        "job_role": "Automation Engineer",
+        "next_step": "Reply to the email to confirm the interview time or request a reschedule if needed.",
+        "category": "cold_offer"
+      }
+    },
+    "<eb3fba20b4a64c8d9ff4699622c79bab@demo-job-tracker.com>": {
+      "id": "JOB-018",
+      "message_id": "<eb3fba20b4a64c8d9ff4699622c79bab@demo-job-tracker.com>",
+      "sig": "6aab3148bdef6a058693a316a21d56cdc5fae2a5",
+      "subject": "Congrats!, You've been selected for the role of Automation engineer at Google Inc.",
+      "sender": "Google@gmail.com",
+      "date": "2026-08-17 12:10",
+      "category": "cold_offer",
+      "company_name": "Google Inc",
+      "job_role": "Automation engineer",
+      "summary": "Google Inc. is a major technology company specializing in internet-related services and products. The role of an Automation Engineer involves developing and maintaining automated systems to improve operational efficiency and software quality.",
+      "mail_summary": "Google Inc. has reached out to offer an interview for an Automation Engineer position, proposing a meeting this Saturday at 3:00 PM IST.",
+      "next_step": "Verify the legitimacy of the sender's email address and reply to confirm the interview slot if interested.",
+      "notes": "",
+      "edited": {}
+    },
+    "<a1e1af1a988c46dabeac8934e9d68cb0@demo-job-tracker.com>": {
+      "id": "JOB-019",
+      "message_id": "<a1e1af1a988c46dabeac8934e9d68cb0@demo-job-tracker.com>",
+      "sig": "1b2fa66d7189058ea34b9c12dc013bdb90bf4b14",
+      "subject": "Your resume has been shortlisted to the role of Manager, Software Development - Meeting on 25th Aug 2026 - Reg.",
+      "sender": "Infosys@gmail.com",
+      "date": "2026-08-17 16:53",
+      "category": "applied",
+      "company_name": "Infosys Private Limited",
+      "job_role": "Manager, Software Development",
+      "summary": "Infosys Private Limited is a global leader in consulting and digital services. The role of Manager, Software Development involves overseeing technical projects and software engineering teams.",
+      "mail_summary": "The candidate has been shortlisted for the Manager, Software Development position and invited to an interview meeting on August 25th, 2026.",
+      "next_step": "Reply to the email to confirm your availability for the interview on August 25th, 2026.",
+      "notes": "",
+      "edited": {}
+    }
+  },
+  "deleted": [
+    "pop3-4",
+    "pop3-5",
+    "pop3-6",
+    "pop3-7",
+    "<07507a6d240146569e498a04c4f4fb7e@demo-job-tracker.com>",
+    "35fd3e4421ae8da3448316537a41c7f0a9a7731f",
+    "<07507a6d240146569e498a04c4f4fb7e@demo-job-tracker.com>",
+    "35fd3e4421ae8da3448316537a41c7f0a9a7731f",
+    "<07507a6d240146569e498a04c4f4fb7e@demo-job-tracker.com>",
+    "35fd3e4421ae8da3448316537a41c7f0a9a7731f",
+    "pop3-3",
+    "pop3-10",
+    "32b3e0421fe712f13b18e2b65a8e3f79261633f0",
+    "<c41ec3d1cefa4dd2a1a8198b902217f7@demo-job-tracker.com>",
+    "99155ed2fbfe9f1d5b6c287d51d36922d0791f0d",
+    "<7695c3d8c42c448a9c0610f3c35df94c@demo-job-tracker.com>",
+    "dea097e675094e6b3b2115e5233e8121353a1b2f",
+    "<1d421a35c0f846989299436822dc5eb1@demo-job-tracker.com>",
+    "addbf226aa0ddf830378bf5c87eec5e4d48006ad",
+    "<ce68373dae47495b91b15f353d16362b@demo-job-tracker.com>",
+    "a36a6ad76178ad8f61a77f529849b561ba1db621",
+    "<501304fc3a76470cb82a7689f25c164d@demo-job-tracker.com>",
+    "066d0a0a2f2fe4e8f09f9e412ad144356208438b",
+    "<4d5d6beffee0445eb67bd2b630dd2a65@demo-job-tracker.com>",
+    "d8c0e05b2238d5dead039ec6159d1f0321f9f9a9",
+    "<301c1990060c4755acb9791116d14a1a@demo-job-tracker.com>",
+    "bed4a02821df99989773084f3b1c2a7b562f834f"
+  ]
+}

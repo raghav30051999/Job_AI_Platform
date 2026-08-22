@@ -1,0 +1,109 @@
+{
+  "profile_at": "2026-08-18 16:49",
+  "payload": {
+    "jd_hash": "cc6be2fc5b03",
+    "company": "Nielsen",
+    "role": "AI / ML Data Scientist",
+    "fit": 61.8,
+    "headline": "AI/ML Data Scientist | Python, Machine Learning, & Agentic AI Automation",
+    "summary": "AI/ML-focused professional with practical experience in building machine learning models and automating data pipelines. Proficient in Python, SQL, and developing RAG-based systems for document processing and data extraction. Experienced in deploying local AI models and integrating agentic workflows to streamline repetitive tasks and improve operational efficiency.",
+    "skills": [
+      "Python",
+      "Machine Learning",
+      "SQL",
+      "Data Pipelines",
+      "RAG",
+      "Git",
+      "Docker",
+      "Automation",
+      "Data Visualization",
+      "LLMs"
+    ],
+    "experience": [
+      {
+        "title": "Junior Assistant",
+        "company": "Government of Andhra Pradesh, Municipal Administration Department",
+        "dates": "July, 2021 \u2013 Present",
+        "bullets": [
+          "Designed automation workflows for tracking financial bills in the AP CFMS system to improve data management.",
+          "Engineered an n8n-based OCR pipeline using Python and Tesseract to convert scanned documents into searchable, structured text.",
+          "Built a RAG pipeline to embed and store data in a vector database, enabling autonomous generation of government correspondence and reports.",
+          "Automated repetitive CRON jobs using Agentic AI solutions to reduce manual intervention in document processing tasks."
+        ]
+      }
+    ],
+    "projects": [
+      {
+        "name": "Fraud Insurance Claim Prediction",
+        "bullets": [
+          "Developed a machine learning model to predict fraudulent vehicle insurance claims using algorithms including Random Forest and XGBoost.",
+          "Applied techniques such as SMOTE and balanced classification to handle highly imbalanced datasets and improve model accuracy."
+        ]
+      },
+      {
+        "name": "Multilingual Legal-Document OCR Pipeline",
+        "bullets": [
+          "Designed a local, privacy-preserving n8n workflow integrating a Dockerized OCR API to extract and parse structured data from PDFs.",
+          "Engineered the pipeline under strict offline constraints to ensure sensitive data remained on-premises."
+        ]
+      },
+      {
+        "name": "Local Agentic AI Assistant (Hermes)",
+        "bullets": [
+          "Configured a self-hosted agent implementing a 7-phase deliberate reasoning cycle to improve the consistency of autonomous decisions.",
+          "Integrated Model Context Protocol (MCP) to automate repetitive tasks and enhance productivity."
+        ]
+      },
+      {
+        "name": "Automated Generation of Government Correspondence and Reports",
+        "bullets": [
+          "Built a system that embeds data into a vector database for the autonomous generation of structured government letters and orders.",
+          "Implemented MCP integration to convert structured data into Word, PDF, PPT, or Excel formats to support instant decision-making."
+        ]
+      }
+    ],
+    "education": [
+      {
+        "degree": "B.Tech, Electrical & Electronics Engineering",
+        "institution": "Pragati Engineering College, Surampalem, Andhra Pradesh",
+        "year": "2016-2020"
+      }
+    ],
+    "gaps": [
+      "Limited professional experience with cloud-native platforms like AWS or Google Cloud.",
+      "No direct evidence of using enterprise dashboarding tools like Spotfire or Tableau."
+    ],
+    "evidence": [
+      {
+        "section": "experience",
+        "text": "Junior Assistant\tJuly, 2021 \u2013 Present\nGovernment of Andhra Pradesh \u2014 Municipal Administration Department.\n\u2022\tDesigned automation workflow for tracking the bills uploaded in AP CFMS (Comprehensive Financial Management System).\n\u2022\tEngineered a n8n-based OCR digitization pipeline that converts scanned documents or PDFs into searchable, structured text. \n\u2022\tBuilt a RAG Pipeline embeds and stores the data into vector database, automatically generation the correspondence and reports. \n\u2022\tAutomation of CRON/Scheduled, repetitive Jobs using Agentic AI and eliminated the human intervention for repetitive tasks. \n\u2022\tAnalysis, Processing, and Generation of Legal Documentation using Agentic AI Solutions.\n\u2022\tBuilt an app that automatically generates the Government Correspondences by pulling the real time data from the Sources like Google Sheets, Google Drive etc.",
+        "score": 0.577
+      },
+      {
+        "section": "other",
+        "text": "| Category | Skills / Technologies |\n|---|---|\n| Programming | Python, JavaScript, HTML, CSS, C |\n| ML | Logistic Regression, Random Forest, XGBoost, Balanced Random Forest, Decision Trees, KNN, Perceptron |\n| ML Evaluation | Precision, Recall, F1, Confusion Matrix, Threshold Optimization, Stratified Split |\n| Imbalanced ML | SMOTE, Balanced Random Forest, Leakage Prevention |\n| Data Science | pandas, NumPy, Matplotlib, Seaborn, Imputation, EDA |\n| GenAI | LLMs, Prompting, Local LLMs, Gemini, Ollama, Hugging Face |\n| RAG | Embeddings, Vector DB, Chroma, Document Ingestion, Retrieval |\n| Agents | LangChain, LangGraph, Hermes, Tool Use, MCP Concepts |\n| Automation | n8n, Browser Automation, Workflow Orchestration |\n| OCR | Tesseract, PyMuPDF, pdfplumber, pdfminer, Pillow |\n| Backend | Flask, Gunicorn, REST/API Integration |\n| Frontend | HTML, CSS, JavaScript, React.js exposure |\n| Databases | SQLite, MySQL, MariaDB |\n| DevOps/Deployment | Docker, Render, Streamlit, Environment Configuration |\n| Version Control | Git, GitHub |\n| APIs | TwelveData, Upstox concepts, SAP OData, Government APIs |\n| Visualization | Plotly, Matplotlib, Seaborn |\n| Financial AI | Stock analytics, market data, trading-agent concepts |",
+        "score": 0.643
+      },
+      {
+        "section": "other",
+        "text": "**Profile:** AI/ML-focused software engineer in transition from a government-sector professional background into Applied AI. Strongest interests are Agentic AI, Generative AI, AI automation, Machine Learning, and RAG. Experienced with Python, pandas, NumPy, Matplotlib, Seaborn, Logistic Regression, Random Forest, XGBoost, Balanced Random Forest, imbalanced classification, SMOTE, threshold optimization, precision/recall/F1, and data-leakage prevention. Built a vehicle insurance fraud detection model using BalancedRandomForestClassifier on a highly imbalanced dataset. Experienced with LLM experimentation using Ollama, Hugging Face, Gemini, Gemma, Qwen, DeepSeek and other local/cloud models. Strong interest and practical exposure in RAG, embeddings, vector databases, Chroma, document ingestion, AnythingLLM, local knowledge systems, agent memory, LangChain, LangGraph, Hermes, and MCP. Built/experimented with OCR and document-processing pipelines using n8n, Docker, Python, PyMuPDF, pdfplumber, pdfminer, Tesseract, pandas and openpyxl. Experienced with APIs, web scraping, government systems, financial APIs, TwelveData, stock-analysis applications, SQLite, MySQL, MariaDB, Flask, Gunicorn, Render, Streamlit, Git and GitHub. Strong problem-solving ability demonstrated through debugging Docker, YAML, OAuth, API, SSL/TLS, OCR, deployment, browser-automation and local-agent issues. Particularly interested in autonomous research agents, AI trading systems, intelligent document processing, large-scale government-process automation, and AI systems capable of retrieving information, reasoning, using tools and executing multi-step workflows. Best-fit career positioning: AI/ML Engineer, Applied AI Engineer, Generative AI Engineer, Agentic AI Engineer, LLM Engineer, AI Automation Engineer, or ML Engineer.",
+        "score": 0.632
+      },
+      {
+        "section": "project",
+        "text": "Fraud Insurance Claim Prediction \u2013 Designed and developed a Machine Learning model to predict the fraud Vehicle Insurance Claim using Machine Learning Algorithms viz Linear Regression, Decision Trees, Random Forest, XGBoost etc. \nMultilingual Legal-Document OCR Pipeline \u2014 Designed a fully local, privacy-preserving n8n workflow integrating a Dockerized OCR API to extract text from scanned PDFs and parsing structured output data, engineered under strict offline/architectural constraints to keep sensitive data on-premises.\nLocal Agentic AI Assistant (Hermes) \u2014 Custom Memory & Reasoning Architecture \u2014 Configured a self-hosted agent that implements a 7-phase deliberate reasoning cycle (Observe, Analyze, Hypothesize, Evaluate, Decide, Act, Reflect) to improve the consistency and quality of autonomous agent decisions.\nConfigured the memory for exceptional accuracy in repetitive tasks. \nAutomated Generation of Government Correspondence and Reports  \u2014 Built a robust system that embeds the data and stores it in Vector Database for autonomous generation of accurate & well structured Government correspondence like letters, orders, etc., and MCP integration to turn the structured data into word, PDF, PPT or excel, which aids instant decision  making.\nLocal Models \u2013 Integration of Model Context Protocol (MCP) and Local AI Models for repititive task automation, ensuring high productivity and robust data privacy.",
+        "score": 0.579
+      },
+      {
+        "section": "experience",
+        "text": "- SQLite\n- MySQL\n- MariaDB\n- phpMyAdmin\n- Structured data storage\n- API-to-database pipelines\n\nUsed databases in practical applications rather than studying SQL only theoretically.\n\n---\n\n# 20. Deployment & Production Thinking\n\nThe user demonstrates awareness of practical deployment problems such as:\n\n- Applications sleeping after inactivity\n- Recruiter-facing demo reliability\n- Cloud hosting limitations\n- Gunicorn configuration\n- Docker environments\n- Environment variables\n- OAuth\n- API limits\n- Model availability\n- Hardware limitations\n\nThis is relevant to **ML Engineering / Applied AI**, where model development alone is insufficient.\n\n---\n\n# 21. Hardware / Local AI Engineering Awareness\n\nThe user's local development environment has included approximately:\n\n- Intel i5-12400HX-class CPU",
+        "score": 0.589
+      },
+      {
+        "section": "education",
+        "text": "B.Tech, Electrical & Electronics Engineering\t2016-2020\nPragati Engineering College, Surampalem, Andhra Pradesh",
+        "score": "core"
+      }
+    ]
+  }
+}

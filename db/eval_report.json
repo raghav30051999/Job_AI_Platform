@@ -1,0 +1,81 @@
+{
+  "generated_at": "2026-08-22 22:58",
+  "retrieval": [
+    {
+      "case": "[auto] skill",
+      "v1": [
+        0.5,
+        0.0
+      ],
+      "v2": [
+        1.0,
+        1.0
+      ],
+      "v2r": [
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "case": "[auto] experience",
+      "v1": [
+        0.25,
+        0.0
+      ],
+      "v2": [
+        0.75,
+        1.0
+      ],
+      "v2r": [
+        0.75,
+        1.0
+      ]
+    },
+    {
+      "case": "[auto] project",
+      "v1": [
+        0.0,
+        0.0
+      ],
+      "v2": [
+        0.5,
+        1.0
+      ],
+      "v2r": [
+        0.5,
+        1.0
+      ]
+    },
+    {
+      "case": "[auto] education",
+      "v1": [
+        0.25,
+        0.0
+      ],
+      "v2": [
+        1.0,
+        1.0
+      ],
+      "v2r": [
+        1.0,
+        1.0
+      ]
+    }
+  ],
+  "generation": {
+    "generation_seconds": 13.0,
+    "total_claims": 52,
+    "unsupported_claims": [
+      "summary: 3+ years of experience (Evidence states 5+ years)",
+      "education: Intermediate (MPC) degree details",
+      "education: SSC degree details",
+      "education: 8.29 score",
+      "education: 90.2 score",
+      "education: 9.2 score"
+    ],
+    "unsupported_rate": 0.12,
+    "faithfulness": 0.88,
+    "section_coverage": 1.0,
+    "est_cost_usd": 0.00815
+  }
+}

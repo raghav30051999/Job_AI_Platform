@@ -1,0 +1,44 @@
+{
+  "sig": "7b90885f9233c25961683e850798bf9dca0a72d0",
+  "payload": {
+    "picks": [
+      {
+        "id": "JOB-017",
+        "company": "Apple Inc",
+        "role": "Automation Engineer",
+        "priority": "High",
+        "reason": "Direct interview invite from a top-tier firm; time-sensitive action required.",
+        "match": 95
+      },
+      {
+        "id": "JOB-018",
+        "company": "Google Inc",
+        "role": "Automation engineer",
+        "priority": "High",
+        "reason": "Immediate interview opportunity with a premier tech company; verify legitimacy and confirm.",
+        "match": 95
+      },
+      {
+        "id": "JOB-019",
+        "company": "Infosys Private Limited",
+        "role": "Manager, Software Development",
+        "priority": "Medium",
+        "reason": "Scheduled interview for a leadership role, providing a strong backup option.",
+        "match": 85
+      }
+    ],
+    "keywords": [
+      "Automation Engineering",
+      "Software Development Management",
+      "System Integration",
+      "Technical Leadership",
+      "Quality Assurance",
+      "Scripting",
+      "Project Management"
+    ],
+    "strategy": "Prioritize immediate confirmation of the Apple and Google interview slots, then dedicate time to preparing high-level architectural responses for the managerial interview at Infosys.",
+    "source": "gemini",
+    "generated_at": "2026-08-17 19:25",
+    "mode": "generic"
+  }
+}
