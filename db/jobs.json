@@ -1,22 +1,6 @@
 {
   "next_id": 20,
   "jobs": {
-    "pop3-2": {
-      "message_id": "pop3-2",
-      "subject": "Your application to Acme Corp",
-      "sender": "Acme Corp Talent Team <talent@acme-corp.com>",
-      "date": "2026-08-14 16:48",
-      "category": "not_job_related",
-      "hidden": true
-    },
-    "pop3-1": {
-      "message_id": "pop3-1",
-      "subject": "Exciting Data Engineer opportunity",
-      "sender": "Priya Sharma <priya@nimbus-analytics.io>",
-      "date": "2026-08-14 16:48",
-      "category": "not_job_related",
-      "hidden": true
-    },
     "<ab3adc45b304458ba97d42a5f0f73e86@demo-job-tracker.com>": {
       "id": "JOB-017",
       "message_id": "<ab3adc45b304458ba97d42a5f0f73e86@demo-job-tracker.com>",
