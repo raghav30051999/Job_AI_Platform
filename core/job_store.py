@@ -62,6 +62,7 @@ def sync_jobs(emails):
 
         if cls.get("is_job_related") is None:
             report["retry"] += 1      # API error -> don't save, retry next sync
+            report["cls_err"] = cls.get("error", "")
             continue
 
         if not cls.get("is_job_related", False):
@@ -84,6 +85,8 @@ def sync_jobs(emails):
     for mid, j in list(store["jobs"].items()):
         if j.get("category") == "not_job_related" and j.get("cls_v", 1) != CLS_VERSION:
             cls = classify_email(j.get("subject", ""), j.get("sender", ""), j.get("body", ""))
+            if cls.get("is_job_related") is None:
+                continue                      # API failed -> leave untagged, retry next sync
             j["cls_v"] = CLS_VERSION
             if cls.get("is_job_related"):
                 store["jobs"][mid] = _make_job(store, mid, j, cls)
