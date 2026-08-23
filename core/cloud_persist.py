@@ -6,8 +6,8 @@ import time
 import requests
 import streamlit as st
 
-REPO = os.getenv("GITHUB_REPO", "raghav30051999/job_ai_platform")
-BRANCH = "cloud-state"
+REPO = os.getenv("GITHUB_REPO", "raghav30051999/Job_AI_Platform")  # must match your GitHub URL
+BRANCH = "cloud-state"     # NON-deployed branch -> pushes never trigger redeploys
 PATH = "db/jobs.json"
 
 
@@ -19,7 +19,7 @@ def _token():
 
 
 def fetch_jobs():
-    """Read live jobs.json from the cloud-state branch. None if unavailable."""
+    """Read the live jobs.json from cloud-state (used once, at boot)."""
     tok = _token()
     if not tok:
         return None
@@ -37,15 +37,13 @@ def fetch_jobs():
     return None
 
 
-# ---------- reliable background pusher (never loses the final state) ----------
 _state = {"dirty": False, "store": None}
 _lock = threading.Lock()
 _started = [False]
 
 
 def push_jobs(store):
-    """Mark store for background push; a single daemon thread pushes the
-    latest state every ~20s. Non-blocking, conflict-safe, retry-safe."""
+    """Mark store dirty; a background thread pushes it within ~5 seconds."""
     with _lock:
         _state["store"] = store
         _state["dirty"] = True
@@ -56,7 +54,7 @@ def push_jobs(store):
 
 def _loop():
     while True:
-        time.sleep(20)
+        time.sleep(5)
         with _lock:
             if not _state["dirty"]:
                 continue
@@ -64,13 +62,13 @@ def _loop():
             _state["dirty"] = False
         if not _do_push(store):
             with _lock:
-                _state["dirty"] = True      # retry next tick
+                _state["dirty"] = True        # retry on next tick
 
 
 def _do_push(store):
     tok = _token()
     if not tok:
-        return True                          # nothing to do locally
+        return True                            # local dev: nothing to do
     try:
         headers = {"Authorization": f"Bearer {tok}",
                    "Accept": "application/vnd.github+json"}
@@ -80,7 +78,7 @@ def _do_push(store):
         if g.status_code == 200:
             sha = g.json().get("sha")
         body = {
-            "message": "chore(cloud): persist synced job store",
+            "message": "chore(cloud): persist job store",
             "content": base64.b64encode(json.dumps(store, indent=2).encode()).decode(),
             "branch": BRANCH,
         }

@@ -1,7 +1,6 @@
 import os
 import json
 import hashlib
-import time
 from core.email_classifier import classify_email
 from core import cloud_persist
 
@@ -18,9 +17,8 @@ def _load_local():
     return {"next_id": 1, "jobs": {}, "deleted": []}
 
 def _load():
-    """Session-local store is authoritative. The GitHub copy is read ONLY once,
-    at process start (i.e., after a reboot/redeploy) — never mid-session,
-    so a stale remote copy can no longer overwrite live data."""
+    """Boot: hydrate from GitHub (cloud-state). After that, ALWAYS serve the
+    in-session cache — refreshes/reruns can never revert to an old copy."""
     if _cache["store"] is not None:
         return _cache["store"]
     store = cloud_persist.fetch_jobs() or _load_local()
@@ -32,7 +30,7 @@ def _save(store):
     with open(JOBS_PATH, "w", encoding="utf-8") as f:
         json.dump(store, f, indent=2)
     _cache["store"] = store
-    cloud_persist.push_jobs(store)   # no-op locally without GITHUB_TOKEN
+    cloud_persist.push_jobs(store)   # lands on GitHub within ~5 seconds
 
 
 def _make_job(store, mid, em, cls):

@@ -53,24 +53,62 @@ Among the received Job Offers, an AI based recommendation system ranks best and 
 ---
 
 ## 🏗️ Architecture
+```text
+PART 1 - JOB TRACKING (what the Dashboard shows)
+================================================
 
-```
-                 ┌──────────────────────────── STREAMLIT CLOUD ────────────────────────────┐
-  SMTP inject ──▶│ Mailtrap Sandbox Inbox                                                  │
-                 │        │ POP3 (strategy-cached)                                         │
-                 │        ▼                                                                │
-                 │  email_reader ──▶ email_classifier (Gemini, retry+backoff)              │
-                 │        │                 │ is_job / category / company / role / next    │
-                 │        ▼                 ▼                                              │
-                 │  job_store ◀── hard dedup (id+sig+blacklist) · repair pass (CLS_VERSION) │
-                 │        │                                                                │
-                 │        ├──▶ dashboard (KPIs · charts · tables · ×N collapse)            │
-                 │        ├──▶ recommender (generic ⇄ personalized via profile RAG)        │
-                 │        └──▶ cloud_persist ── GitHub Contents API ──▶ [cloud-state]      │
-                 │                                                                           │
-                 │  Resume Designer: profile_rag (chunk→embed→RRF hybrid→rerank)            │
-                 │        └─▶ resume_tailor (writer → frozen-facts editor → exporters)     │
-                 └───────────────────────────────────────────────────────────────────────────┘
+  [1] TEST INBOX (Mailtrap sandbox)
+      A safe practice mailbox, though the users can't be able to reach the sandboxed mail, however the inbox is pre-connected to the project for testing.
+      |
+      | a mail arrives
+      v
+  [2] AI MAIL READER (Gemini)
+      Reads it: "Job-related? Which company? Which role? What next?"
+      |
+      | writes a tidy job card
+      v
+  [3] JOB MEMORY (saved on GitHub, survives restarts)
+      Keeps every card; throws away duplicates and spam.
+      |
+      +-------------------------------+
+      | (show it)                     | (rank it)
+      v                               v
+  [4] JOB DASHBOARD               [5] AI Based recommendation
+      Tables + charts +           "Ranks the best 
+      next-step advice            opportunity first (Personalized ranking feature is also available)"
+
+
+PART 2 - RESUME DESIGNER (how your resume is built)
+===================================================
+
+  [6] YOUR PROFILE                [7] JOB DESCRIPTION
+      Pasted once; chopped            The job you want;
+      into pieces & memorized         pasted per application
+      |                               |
+      | your real experience          | what this job needs
+      +---------------+---------------+
+                      |
+                      v
+                [8] SMART SEARCH (RAG)
+                    Finds ONLY the pieces of your
+                    history that match this job
+                      |
+                      | evidence pack
+                      v
+                [9] AI RESUME WRITER
+                    Prepares resume with those facts collected from user profile ; the editor
+                    polishes words but may never change
+                    a single fact
+                      |
+                      v
+                [10] DOWNLOAD
+                    Provides resume in ".docx/.pdf/.txt" format for flexible uses
+
+
+  LINK BETWEEN THE PARTS
+  ======================
+  [6] YOUR PROFILE also powers the Dashboard's
+  "Personalized mode" ranking in [5].
 ```
 
 **Persistence model:** Streamlit Cloud's disk is ephemeral, so the app treats **GitHub as its database** — every sync is debounced and pushed to a non-deployed `cloud-state` branch; on boot the store is hydrated from there. Local runs fall back to plain files. Zero extra services.
