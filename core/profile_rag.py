@@ -4,6 +4,7 @@ import json
 import math
 import hashlib
 import datetime
+import time
 from core.embeddings import embed_text
 from core.gemini_client import generate_json
 
