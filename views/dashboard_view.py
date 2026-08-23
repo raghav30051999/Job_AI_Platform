@@ -345,12 +345,12 @@ def render():
                 unsafe_allow_html=True)
     st.markdown(
         "<div style='font-size:.85rem;color:#44566C;line-height:1.55;margin:0 0 1rem 0'>"
-        "<b>How this demo works:</b> the app securely connects to a sandbox email inbox (Mailtrap), "
-        "fetches recent emails, and a Gemini AI classifier reads each one. Genuine job-related mails "
-        "(applications, shortlists, interview invites, offers) are extracted into structured cards with "
-        "company, role and next step, while duplicates and newsletters are filtered out automatically. "
-        "Try it live — open <b>🧪 Test by sending an email</b> at the bottom, send a sample mail, press "
-        "<b>🔄 Sync now</b>, and watch it appear in the tables below."
+        "<b>How this demo works:</b> The app securely connects to a sandbox email inbox (Mailtrap). "
+        "Let's assume an e-mail was sent to your mail id. "
+        " Mail received -> fetch the received mail -> read and classify using gemini -> if related to Job -> Determine whether it's an applied Job or Job-Offer without prior application -> Reflect in the dashboard along with suggestion related to next action"  
+        "AI Based Suggestion for accepting the best Job-Offer"
+        "Wanna give it a try? Reach the last section of this page"
+        "Note: A sample demo email was already connected to this project for demo purpose, so you can easily send a mail and press sync now, so that it will be instantly shown in the dashboard. "
         "</div>",
         unsafe_allow_html=True)
 
