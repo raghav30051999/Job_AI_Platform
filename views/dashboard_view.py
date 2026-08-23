@@ -350,12 +350,15 @@ def render():
     st.markdown(f"<span class='chip {chip_class}'>{chip_text}</span>",
                 unsafe_allow_html=True)
 
+    BUILD = "v0823a"   # bump this tag on EVERY push so we can verify the cloud is fresh
     rep = STATUS.get("report")
-    line = f"scanning since {get_scan_since().strftime('%Y-%m-%d %H:%M')}"
+    line = f"[{BUILD}] scanning since {get_scan_since().strftime('%Y-%m-%d %H:%M')}"
     if rep:
         line += (f" · fetched {rep['fetched']} · duplicates skipped {rep['dup']}"
                  f" · not job-related {rep['not_job']} · added {rep['added']}"
                  f" · retry {rep.get('retry', 0)} · rescued {rep.get('reclassified', 0)}")
+        if rep.get("cls_err"):
+            line += f" · ⚠️ CLS ERROR: {rep['cls_err']}"
     st.caption(line)
 
     jobs = get_jobs()
