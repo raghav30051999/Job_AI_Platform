@@ -6,7 +6,7 @@ import time
 import requests
 import streamlit as st
 
-REPO = os.getenv("GITHUB_REPO", "raghav30051999/job_ai_platform")  # adjust if different
+REPO = os.getenv("GITHUB_REPO", "raghav30051999/job_ai_platform")
 BRANCH = "cloud-state"
 PATH = "db/jobs.json"
 
@@ -19,7 +19,7 @@ def _token():
 
 
 def fetch_jobs():
-    """Read the live jobs.json from the cloud-state branch. None if unavailable."""
+    """Read live jobs.json from the cloud-state branch. None if unavailable."""
     tok = _token()
     if not tok:
         return None
@@ -37,36 +37,56 @@ def fetch_jobs():
     return None
 
 
-_last_push = [0.0]
+# ---------- reliable background pusher (never loses the final state) ----------
+_state = {"dirty": False, "store": None}
+_lock = threading.Lock()
+_started = [False]
 
-def push_jobs(store, debounce=20):
-    """Background-push jobs.json to cloud-state (debounced). No-op without token."""
+
+def push_jobs(store):
+    """Mark store for background push; a single daemon thread pushes the
+    latest state every ~20s. Non-blocking, conflict-safe, retry-safe."""
+    with _lock:
+        _state["store"] = store
+        _state["dirty"] = True
+        if not _started[0]:
+            _started[0] = True
+            threading.Thread(target=_loop, daemon=True).start()
+
+
+def _loop():
+    while True:
+        time.sleep(20)
+        with _lock:
+            if not _state["dirty"]:
+                continue
+            store = _state["store"]
+            _state["dirty"] = False
+        if not _do_push(store):
+            with _lock:
+                _state["dirty"] = True      # retry next tick
+
+
+def _do_push(store):
     tok = _token()
     if not tok:
-        return
-    now = time.time()
-    if now - _last_push[0] < debounce:
-        return
-    _last_push[0] = now
-
-    def _do():
-        try:
-            headers = {"Authorization": f"Bearer {tok}",
-                       "Accept": "application/vnd.github+json"}
-            url = f"https://api.github.com/repos/{REPO}/contents/{PATH}"
-            sha = None
-            g = requests.get(url, params={"ref": BRANCH}, headers=headers, timeout=10)
-            if g.status_code == 200:
-                sha = g.json().get("sha")
-            body = {
-                "message": "chore(cloud): persist synced job store",
-                "content": base64.b64encode(json.dumps(store, indent=2).encode()).decode(),
-                "branch": BRANCH,
-            }
-            if sha:
-                body["sha"] = sha
-            requests.put(url, headers=headers, json=body, timeout=20)
-        except Exception:
-            pass  # never let persistence break the app
-
-    threading.Thread(target=_do, daemon=True).start()
+        return True                          # nothing to do locally
+    try:
+        headers = {"Authorization": f"Bearer {tok}",
+                   "Accept": "application/vnd.github+json"}
+        url = f"https://api.github.com/repos/{REPO}/contents/{PATH}"
+        sha = None
+        g = requests.get(url, params={"ref": BRANCH}, headers=headers, timeout=10)
+        if g.status_code == 200:
+            sha = g.json().get("sha")
+        body = {
+            "message": "chore(cloud): persist synced job store",
+            "content": base64.b64encode(json.dumps(store, indent=2).encode()).decode(),
+            "branch": BRANCH,
+        }
+        if sha:
+            body["sha"] = sha
+        r = requests.put(url, headers=headers, json=body, timeout=20)
+        return r.status_code in (200, 201)
+    except Exception:
+        return False

@@ -9,7 +9,7 @@ DB_DIR = "db"
 JOBS_PATH = os.path.join(DB_DIR, "jobs.json")
 CLS_VERSION = 2
 
-_cache = {"store": None, "ts": 0.0}
+_cache = {"store": None}
 
 def _load_local():
     if os.path.exists(JOBS_PATH):
@@ -18,19 +18,20 @@ def _load_local():
     return {"next_id": 1, "jobs": {}, "deleted": []}
 
 def _load():
-    """Cloud: read live store from GitHub (45s cache). Local: plain file."""
-    now = time.time()
-    if _cache["store"] is not None and now - _cache["ts"] < 45:
+    """Session-local store is authoritative. The GitHub copy is read ONLY once,
+    at process start (i.e., after a reboot/redeploy) — never mid-session,
+    so a stale remote copy can no longer overwrite live data."""
+    if _cache["store"] is not None:
         return _cache["store"]
     store = cloud_persist.fetch_jobs() or _load_local()
-    _cache["store"], _cache["ts"] = store, now
+    _cache["store"] = store
     return store
 
 def _save(store):
     os.makedirs(DB_DIR, exist_ok=True)
     with open(JOBS_PATH, "w", encoding="utf-8") as f:
         json.dump(store, f, indent=2)
-    _cache["store"], _cache["ts"] = store, time.time()
+    _cache["store"] = store
     cloud_persist.push_jobs(store)   # no-op locally without GITHUB_TOKEN
 
 
