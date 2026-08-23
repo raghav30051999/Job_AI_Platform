@@ -1,25 +1,37 @@
 import os
 import json
 import hashlib
+import time
 from core.email_classifier import classify_email
+from core import cloud_persist
 
 DB_DIR = "db"
 JOBS_PATH = os.path.join(DB_DIR, "jobs.json")
+CLS_VERSION = 2
 
-CLS_VERSION = 2  # bump this whenever the classifier prompt changes -> forces re-evaluation
+_cache = {"store": None, "ts": 0.0}
 
-
-def _load():
+def _load_local():
     if os.path.exists(JOBS_PATH):
         with open(JOBS_PATH, "r", encoding="utf-8") as f:
             return json.load(f)
     return {"next_id": 1, "jobs": {}, "deleted": []}
 
+def _load():
+    """Cloud: read live store from GitHub (45s cache). Local: plain file."""
+    now = time.time()
+    if _cache["store"] is not None and now - _cache["ts"] < 45:
+        return _cache["store"]
+    store = cloud_persist.fetch_jobs() or _load_local()
+    _cache["store"], _cache["ts"] = store, now
+    return store
 
 def _save(store):
     os.makedirs(DB_DIR, exist_ok=True)
     with open(JOBS_PATH, "w", encoding="utf-8") as f:
         json.dump(store, f, indent=2)
+    _cache["store"], _cache["ts"] = store, time.time()
+    cloud_persist.push_jobs(store)   # no-op locally without GITHUB_TOKEN
 
 
 def _make_job(store, mid, em, cls):
