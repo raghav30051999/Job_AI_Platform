@@ -104,9 +104,19 @@ def sync_now(force=True, limit=50):
         STATUS["last_ok"] = time.strftime("%H:%M:%S")
         STATUS["last_err"] = None
 
+        # New/changed jobs -> regenerate AI recommendations immediately
+        if report.get("added") or report.get("reclassified"):
+            try:
+                import streamlit as st
+                from core.recommender import get_recommendations
+                personal = bool(st.session_state.get("reco_personal", False))
+                get_recommendations(force=True, personal=personal)
+            except Exception:
+                pass
+
     except Exception as e:
         STATUS["last_err"] = str(e)
 
     finally:
         _lock["running"] = False
-        STATUS["running"] = False 
+        STATUS["running"] = False

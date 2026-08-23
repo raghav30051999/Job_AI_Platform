@@ -25,6 +25,14 @@ def _clean(v):
 def _disp(job):
     return {**job, **job.get("edited", {})}
 
+def _refresh_reco():
+    """Force-refresh AI recommendations after deletions."""
+    try:
+        personal = bool(st.session_state.get("reco_personal", False))
+        get_recommendations(force=True, personal=personal)
+    except Exception:
+        pass
+
 
 def _set_all(master_key, sel_keys):
     val = st.session_state.get(master_key, False)   # .get -> no KeyError on fresh sessions
@@ -196,6 +204,7 @@ def _job_row(mid, d):
     if st.session_state.get(confirm_key):
         if a2.button("❗", key=f"delbtn_{d['id']}", help="Click again to confirm"):
             delete_by_ids([d["id"]])
+            _refresh_reco()
             st.session_state.pop(confirm_key, None)
             st.rerun()
     else:
@@ -220,6 +229,7 @@ def _table_section(label, icon, pairs, key, color):
         chosen = [i for i in ids if st.session_state.get(f"sel_{i}")]
         if chosen:
             delete_by_ids(chosen)
+            _refresh_reco()
         for i in ids:
             st.session_state[f"sel_{i}"] = False
         st.session_state[f"select_all_{key}"] = False
@@ -250,9 +260,9 @@ def _recommendation_section():
     mode = ("personalized", "#1B7F3B") if personal else ("generic mode", "#B45309")
 
     st.markdown("<div style='height:1.6rem'></div>", unsafe_allow_html=True)
-    head, tog = st.columns([6, 3], vertical_alignment="center")
+    head, tog = st.columns([10, 2], gap="small", vertical_alignment="center")
     head.markdown(
-        "<h3 style='margin:0 0 .4rem 0'>AI Based recommendation:"
+        "<h3 style='margin:0 0 .6rem 0'>AI Based recommendation:"
         "<span class='pill' style='background:#2563EB22;color:#2563EB'>beta</span>"
         f"<span class='pill' style='background:{mode[1]}22;color:{mode[1]}'>{mode[0]}</span></h3>",
         unsafe_allow_html=True)
@@ -276,7 +286,6 @@ def _recommendation_section():
             get_recommendations(force=True, personal=personal)
             st.rerun()
 
-        # priority-based light fills: same priority = same color
         FILLS = {
             "high":   ("#FFF7ED", "#EA580C"),
             "medium": ("#EFF6FF", "#2563EB"),
@@ -380,7 +389,7 @@ def render():
     st.markdown(f"<span class='chip {chip_class}'>{chip_text}</span>",
                 unsafe_allow_html=True)
 
-    BUILD = "v0823a"   # bump this tag on EVERY push so we can verify the cloud is fresh
+    BUILD = "v0824b"   # bump this tag on EVERY push so we can verify the cloud is fresh
     rep = STATUS.get("report")
     line = f"[{BUILD}] scanning since {get_scan_since().strftime('%Y-%m-%d %H:%M')}"
     if rep:
