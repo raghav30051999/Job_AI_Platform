@@ -344,16 +344,28 @@ def render():
     st.markdown("<h2 style='margin:.5rem 0 .8rem 0'>💼 Job Dashboard</h2>",
                 unsafe_allow_html=True)
     st.markdown(
-        "<div style='font-size:.85rem;color:#44566C;line-height:1.55;margin:0 0 1rem 0'>"
-        "<b>How this demo works:</b> The app securely connects to a sandbox email inbox (Mailtrap). "
-        "Let's assume an e-mail was sent to your mail id. \n"
-        " Mail received -> fetch the received mail -> read and classify using gemini -> if related to Job -> Determine whether it's an applied Job or Job-Offer without prior application -> Reflect in the dashboard along with suggestion related to next action\n"  
-        "AI Based Suggestion for accepting the best Job-Offer\n"
-        "Wanna give it a try? Reach the last section of this page\n"
-        "Note: A sample demo email was already connected to this project for demo purpose, so you can easily send a mail and press sync now, so that it will be instantly shown in the dashboard. "
+        "<div style='font-size:.85rem;color:#44566C;line-height:1.6;margin:0 0 1rem 0'>"
+        "<b style='color:#16324F'>How this demo works:</b> imagine a job-related email lands in your inbox. "
+        "This app securely connects to a sandbox inbox (Mailtrap) and runs every mail through an end-to-end AI pipeline:"
+        "<div style='margin:.6rem 0 .55rem 0;display:flex;flex-wrap:wrap;gap:.35rem;align-items:center'>"
+        "<span style='background:#EFF6FF;color:#2563EB;padding:.22rem .65rem;border-radius:999px;font-weight:600'>📥 Mail received</span>"
+        "<span style='color:#94A3B8'>→</span>"
+        "<span style='background:#EFF6FF;color:#2563EB;padding:.22rem .65rem;border-radius:999px;font-weight:600'>🔌 Fetched via POP3</span>"
+        "<span style='color:#94A3B8'>→</span>"
+        "<span style='background:#EFF6FF;color:#2563EB;padding:.22rem .65rem;border-radius:999px;font-weight:600'>🤖 Gemini reads &amp; classifies</span>"
+        "<span style='color:#94A3B8'>→</span>"
+        "<span style='background:#EFF6FF;color:#2563EB;padding:.22rem .65rem;border-radius:999px;font-weight:600'>💼 Applied vs Offer-without-application</span>"
+        "<span style='color:#94A3B8'>→</span>"
+        "<span style='background:#EFF6FF;color:#2563EB;padding:.22rem .65rem;border-radius:999px;font-weight:600'>📊 Dashboard + next-step advice</span>"
+        "</div>"
+        "An <b>AI copilot</b> further ranks your live opportunities and suggests which offer deserves your acceptance first.<br>"
+        "<b>Want to try it live?</b> Jump to <b>🧪 Test by sending an email</b> at the bottom of this page — "
+        "the sandbox inbox is pre-connected, so send a sample mail, press <b>🔄 Sync now</b>, "
+        "and watch it flow through the pipeline into the tables above within seconds. "
+        "No real mailbox is ever touched."
         "</div>",
         unsafe_allow_html=True)
-
+    
     ok = STATUS["last_err"] is None
 
     ok = STATUS["last_err"] is None
