@@ -27,7 +27,7 @@ def _disp(job):
 
 
 def _set_all(master_key, sel_keys):
-    val = st.session_state[master_key]
+    val = st.session_state.get(master_key, False)   # .get -> no KeyError on fresh sessions
     for k in sel_keys:
         st.session_state[k] = val
 
@@ -360,6 +360,7 @@ def render():
         if rep.get("cls_err"):
             line += f" · ⚠️ CLS ERROR: {rep['cls_err']}"
     st.caption(line)
+
 
     jobs = get_jobs()
     # Inject message_id into display dict so we don't lose it during collapse
