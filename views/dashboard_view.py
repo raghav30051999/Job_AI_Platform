@@ -356,8 +356,6 @@ def render():
         line += (f" · fetched {rep['fetched']} · duplicates skipped {rep['dup']}"
                  f" · not job-related {rep['not_job']} · added {rep['added']}"
                  f" · retry {rep.get('retry', 0)} · rescued {rep.get('reclassified', 0)}")
-    if rep.get("cls_err"):
-        line += f" · ⚠️ classifier error: {rep['cls_err']}"
     st.caption(line)
 
     jobs = get_jobs()
