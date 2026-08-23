@@ -92,19 +92,26 @@ def chunk_profile(text):
 
 
 # ---------------------------------------------------------------- storage (unchanged)
-def save_profile(text, source="pasted"):
+def save_profile(text, source="pasted", progress_cb=None):
     text = (text or "").strip()
     if not text:
         raise ValueError("Profile text is empty.")
     old_vecs = {c.get("hash"): c.get("vec") for c in get_index()}
     chunks = chunk_profile(text)
-    index, seen = [], set()
-    new_embeds = 0
+
+    # dedupe first so the progress total is accurate
+    unique, seen = [], set()
     for c in chunks:
         h = hashlib.sha1(c["text"].encode("utf-8")).hexdigest()
-        if h in seen:                      # skip duplicate chunks
-            continue
-        seen.add(h)
+        if h not in seen:
+            seen.add(h)
+            unique.append((h, c))
+
+    index, new_embeds = [], 0
+    total = len(unique)
+    for n, (h, c) in enumerate(unique, 1):
+        if progress_cb:
+            progress_cb(n, total, c["section"])
         vec = old_vecs.get(h)              # reuse vector if chunk unchanged
         if vec is None:
             vec = embed_text(c["text"])
@@ -128,7 +135,7 @@ def save_profile(text, source="pasted"):
     return meta
 
 
-def append_profile(new_text, source="append"):
+def append_profile(new_text, source="append", progress_cb=None):
     """Append new data (project / skill / certification) and re-index incrementally."""
     new_text = (new_text or "").strip()
     if not new_text:
@@ -136,7 +143,7 @@ def append_profile(new_text, source="append"):
     prof = get_profile()
     base = (prof or {}).get("text", "").strip()
     full = (base + "\n\n" + new_text) if base else new_text
-    return save_profile(full, source=source)
+    return save_profile(full, source=source, progress_cb=progress_cb)
 
 def get_profile():
     if not os.path.exists(PROFILE_PATH):

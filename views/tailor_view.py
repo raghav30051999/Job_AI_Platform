@@ -1114,6 +1114,23 @@ It is:
 def _spacer(h="1.25rem"):
     st.markdown(f'<div style="height:{h}"></div>', unsafe_allow_html=True)
 
+def _run_indexing(bar, fn):
+    """Run an indexing function with a live progress bar; honest error banner."""
+    def _cb(n, total, sec):
+        bar.progress(int(n * 100 / max(total, 1)),
+                     text=f"Embedding chunk {n}/{total} · section: {sec}")
+    try:
+        meta = fn(_cb)
+        bar.progress(100, text="✅ Indexing complete")
+        st.session_state["clear_profile_box"] = True
+        st.session_state["flash_msg"] = (f"✅ Indexed {meta['chunks']} chunks "
+                                         f"({meta.get('new_embeds', 0)} new embeddings).")
+        return meta
+    except Exception as e:
+        bar.empty()
+        st.session_state["flash_msg"] = f"⚠️ Indexing failed: {type(e).__name__}: {str(e)[:180]}"
+        return None
+
 
 def _profile_uploader():
     with st.container(border=True):
@@ -1143,13 +1160,8 @@ def _profile_uploader():
         b1, b2, b3 = st.columns(3)
         if b1.button("💾 Save & Index", width="stretch", key="prof_save"):
             if txt.strip():
-                with st.spinner("Chunking & embedding profile..."):
-                    try:
-                        meta = save_profile(txt)
-                        st.session_state["clear_profile_box"] = True
-                        st.session_state["flash_msg"] = f"✅ Indexed {meta['chunks']} chunks."
-                    except Exception as e:
-                        st.session_state["flash_msg"] = f"⚠️ Indexing paused due to API rate limits. Please wait 1 minute and try again. ({type(e).__name__})"
+                bar = st.progress(0, text="Chunking profile…")
+                _run_indexing(bar, lambda cb: save_profile(txt, progress_cb=cb))
                 st.rerun()
             else:
                 st.warning("Paste your profile first.")
@@ -1157,27 +1169,19 @@ def _profile_uploader():
         if b2.button("➕ Append & Re-index", width="stretch", key="prof_append",
                      disabled=not bool(prof)):
             if txt.strip():
-                with st.spinner("Appending & embedding new chunks..."):
-                    try:
-                        meta = append_profile(txt)
-                        st.session_state["clear_profile_box"] = True
-                        st.session_state["flash_msg"] = (f"✅ Appended · {meta['chunks']} chunks total "
-                                                         f"({meta.get('new_embeds', 0)} new embeddings).")
-                    except Exception as e:
-                        st.session_state["flash_msg"] = f"⚠️ Indexing paused due to API rate limits. Please wait 1 minute and try again. ({type(e).__name__})"
+                bar = st.progress(0, text="Appending & re-indexing…")
+                _run_indexing(bar, lambda cb: append_profile(txt, progress_cb=cb))
                 st.rerun()
             else:
                 st.warning("Paste the new data first.")
 
         if b3.button("📥 Load demo profile", width="stretch", key="prof_sample"):
-            with st.spinner("Loading & indexing demo profile..."):
-                try:
-                    meta = save_profile(SAMPLE_PROFILE, source="demo")
-                    st.session_state["load_sample"] = True
-                    st.session_state["flash_msg"] = (f"✅ Demo profile loaded & indexed · {meta['chunks']} chunks. "
-                                                     "Paste a JD below and press Generate!")
-                except Exception as e:
-                    st.session_state["flash_msg"] = f"⚠️ Demo indexing paused due to API rate limits. Please wait 1 minute and try again. ({type(e).__name__})"
+            bar = st.progress(0, text="Loading & indexing demo profile…")
+            meta = _run_indexing(bar, lambda cb: save_profile(SAMPLE_PROFILE,
+                                                              source="demo",
+                                                              progress_cb=cb))
+            if meta:
+                st.session_state["load_sample"] = True
             st.rerun()
 
 def _resume_text(res):
