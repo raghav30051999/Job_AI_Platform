@@ -346,10 +346,10 @@ def render():
     st.markdown(
         "<div style='font-size:.85rem;color:#44566C;line-height:1.55;margin:0 0 1rem 0'>"
         "<b>How this demo works:</b> The app securely connects to a sandbox email inbox (Mailtrap). "
-        "Let's assume an e-mail was sent to your mail id. "
-        " Mail received -> fetch the received mail -> read and classify using gemini -> if related to Job -> Determine whether it's an applied Job or Job-Offer without prior application -> Reflect in the dashboard along with suggestion related to next action"  
-        "AI Based Suggestion for accepting the best Job-Offer"
-        "Wanna give it a try? Reach the last section of this page"
+        "Let's assume an e-mail was sent to your mail id. \n"
+        " Mail received -> fetch the received mail -> read and classify using gemini -> if related to Job -> Determine whether it's an applied Job or Job-Offer without prior application -> Reflect in the dashboard along with suggestion related to next action\n"  
+        "AI Based Suggestion for accepting the best Job-Offer\n"
+        "Wanna give it a try? Reach the last section of this page\n"
         "Note: A sample demo email was already connected to this project for demo purpose, so you can easily send a mail and press sync now, so that it will be instantly shown in the dashboard. "
         "</div>",
         unsafe_allow_html=True)
