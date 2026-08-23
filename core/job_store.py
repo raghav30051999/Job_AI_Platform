@@ -6,6 +6,8 @@ from core.email_classifier import classify_email
 DB_DIR = "db"
 JOBS_PATH = os.path.join(DB_DIR, "jobs.json")
 
+CLS_VERSION = 2  # bump this whenever the classifier prompt changes -> forces re-evaluation
+
 
 def _load():
     if os.path.exists(JOBS_PATH):
@@ -20,50 +22,73 @@ def _save(store):
         json.dump(store, f, indent=2)
 
 
+def _make_job(store, mid, em, cls):
+    job = {
+        "id": f"JOB-{store['next_id']:03d}",
+        "message_id": mid, "sig": em.get("sig", ""),
+        "subject": em.get("subject", ""), "sender": em.get("sender", ""),
+        "date": em.get("date", ""),
+        "category": cls.get("category") if cls.get("category") in ("applied", "cold_offer") else "applied",
+        "company_name": cls.get("company_name", "Unknown"),
+        "job_role": cls.get("job_role", "Unknown"),
+        "summary": cls.get("summary", ""),
+        "mail_summary": cls.get("mail_summary", ""),
+        "next_step": cls.get("next_step", ""),
+        "notes": "", "edited": {}, "cls_v": CLS_VERSION,
+    }
+    store["next_id"] += 1
+    return job
+
+
 def sync_jobs(emails):
     store = _load()
     deleted = set(store.get("deleted", []))
     existing_sigs = {j.get("sig") for j in store["jobs"].values()}
-    report = {"fetched": len(emails), "dup": 0, "not_job": 0, "added": 0}
+    report = {"fetched": len(emails), "dup": 0, "not_job": 0, "added": 0,
+              "retry": 0, "reclassified": 0}
     changed = False
+
     for em in emails:
         mid = em["message_id"]
         sig = hashlib.sha1(
             (em["subject"] + em["sender"] + em["body"]).encode("utf-8")
         ).hexdigest()
 
-        # skip: already stored, duplicate content, or previously deleted
         if mid in store["jobs"] or sig in existing_sigs or mid in deleted or sig in deleted:
             report["dup"] += 1
             continue
 
         cls = classify_email(em["subject"], em["sender"], em["body"])
 
+        if cls.get("is_job_related") is None:
+            report["retry"] += 1      # API error -> don't save, retry next sync
+            continue
+
         if not cls.get("is_job_related", False):
             report["not_job"] += 1
             store["jobs"][mid] = {
                 "message_id": mid, "subject": em["subject"], "sender": em["sender"],
                 "date": em["date"], "category": "not_job_related", "hidden": True,
-                "sig": sig,
+                "sig": sig, "body": em["body"][:3000], "cls_v": CLS_VERSION,
             }
         else:
             report["added"] += 1
-            store["jobs"][mid] = {
-                "id": f"JOB-{store['next_id']:03d}",
-                "message_id": mid, "sig": sig,
-                "subject": em["subject"], "sender": em["sender"], "date": em["date"],
-                "category": cls.get("category", "applied"),
-                "company_name": cls.get("company_name", "Unknown"),
-                "job_role": cls.get("job_role", "Unknown"),
-                "summary": cls.get("summary", ""),
-                "mail_summary": cls.get("mail_summary", ""),
-                "next_step": cls.get("next_step", ""),
-                "notes": "", "edited": {},
-            }
-            store["next_id"] += 1
+            em2 = dict(em)
+            em2["sig"] = sig
+            store["jobs"][mid] = _make_job(store, mid, em2, cls)
 
         existing_sigs.add(sig)
         changed = True
+
+    # REPAIR PASS: re-evaluate hidden emails classified by an older classifier version
+    for mid, j in list(store["jobs"].items()):
+        if j.get("category") == "not_job_related" and j.get("cls_v", 1) != CLS_VERSION:
+            cls = classify_email(j.get("subject", ""), j.get("sender", ""), j.get("body", ""))
+            j["cls_v"] = CLS_VERSION
+            if cls.get("is_job_related"):
+                store["jobs"][mid] = _make_job(store, mid, j, cls)
+                report["reclassified"] += 1
+            changed = True
 
     if changed:
         _save(store)

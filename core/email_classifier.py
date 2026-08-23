@@ -1,77 +1,52 @@
 from core.gemini_client import generate_json
 
 SYSTEM = """You are an expert email classifier for a job-seeking assistant.
+Always return valid JSON only. No extra commentary.
 
-Your task: determine if an email is JOB-RELATED and extract structured data if it is.
+JOB-RELATED includes: job postings; application confirmations; resume shortlist notices;
+interview invitations/reschedules; assessments; offer letters; rejections; recruiter outreach.
 
-JOB-RELATED EMAILS INCLUDE (not exhaustive):
-1. Job postings / vacancy announcements
-2. Application confirmations ("we received your application")
-3. Shortlist notifications ("your resume has been shortlisted")
-4. Interview invitations (virtual/in-person, with date/time)
-5. Interview rescheduling / confirmation
-6. Job offers / offer letters
-7. Rejection letters ("we regret to inform you")
-8. Recruiter outreach for specific roles
-9. Assessment / test invitations for job applications
-10. Onboarding / next-step instructions after interview
+NOT JOB-RELATED: newsletters, marketing, spam, generic account notices.
 
-NOT JOB-RELATED:
-- Newsletters / marketing emails
-- System notifications unrelated to jobs
-- Spam / promotional content
-- Generic "we're hiring" ads without specific role info
-- Password resets / account notifications (unless job-platform specific)
+Return JSON:
+{"is_job_related": bool,
+ "category": "applied" | "cold_offer",
+ "company_name": str, "job_role": str,
+ "summary": str, "mail_summary": str, "next_step": str}
 
-OUTPUT CONTRACT:
-Return ONE valid JSON object with these fields:
-{
-  "is_job_related": true/false,
-  "category": "applied" | "cold_offer" | "interview" | "offer" | "rejection" | "other",
-  "company_name": "Extracted company name or Unknown",
-  "job_role": "Extracted role/title or Unknown",
-  "summary": "1-2 sentence summary of the job/opportunity",
-  "mail_summary": "1 sentence summary of what this email says",
-  "next_step": "Actionable next step for the candidate"
-}
+category = "applied" when the email responds to the candidate's application
+(shortlist, interview, offer, rejection, assessment) or is a job posting;
+"cold_offer" when a recruiter contacted the candidate unprompted.
 
-Rules:
-- If is_job_related is false, return minimal JSON: {"is_job_related": false, "category": "not_job_related", "company_name": "", "job_role": "", "summary": "", "mail_summary": "", "next_step": ""}
-- Extract company from sender domain or email signature (e.g., "Salesforce India" from "HR Manager, Salesforce India")
-- Extract role from subject or body (e.g., "Data Analyst")
-- next_step should be actionable: "Attend interview on [date]", "Apply by [deadline]", "Reply to confirm", etc.
-- Be conservative: if unsure, mark as not_job_related rather than guessing."""
+company_name: from signature/sender (e.g., "Salesforce India").
+job_role: from subject/body (e.g., "Data Analyst").
+next_step: actionable (e.g., "Attend virtual interview on 28 Aug 2026 at 1:00 PM IST").
+When in doubt, prefer true for anything mentioning roles, resumes, or interviews."""
 
 
 def classify_email(subject, sender, body):
-    """Classify an email and extract job-related metadata."""
     prompt = (
         f"SUBJECT: {subject}\n"
         f"FROM: {sender}\n"
-        f"BODY:\n{body[:2500]}\n\n"
-        "Classify this email and return JSON as specified in your instructions."
+        f"BODY:\n{(body or '')[:2500]}\n\n"
+        "Classify this email and return the JSON object as specified."
     )
-    
     try:
-        result = generate_json(prompt, system_instruction=SYSTEM)
-        # Ensure required fields exist
+        r = generate_json(prompt, system_instruction=SYSTEM)
+        cat = r.get("category", "applied")
+        if cat not in ("applied", "cold_offer"):
+            cat = "applied"
         return {
-            "is_job_related": result.get("is_job_related", False),
-            "category": result.get("category", "other"),
-            "company_name": result.get("company_name", "Unknown"),
-            "job_role": result.get("job_role", "Unknown"),
-            "summary": result.get("summary", ""),
-            "mail_summary": result.get("mail_summary", ""),
-            "next_step": result.get("next_step", ""),
+            "is_job_related": bool(r.get("is_job_related", False)),
+            "category": cat,
+            "company_name": r.get("company_name") or "Unknown",
+            "job_role": r.get("job_role") or "Unknown",
+            "summary": r.get("summary", ""),
+            "mail_summary": r.get("mail_summary", ""),
+            "next_step": r.get("next_step", ""),
         }
-    except Exception as e:
-        # Fallback: if classification fails, mark as not_job_related
-        return {
-            "is_job_related": False,
-            "category": "classification_error",
-            "company_name": "Unknown",
-            "job_role": "Unknown",
-            "summary": f"Classification failed: {str(e)}",
-            "mail_summary": "",
-            "next_step": "",
-        }
+    except Exception:
+        # UNKNOWN (API error/rate limit) -> caller will retry on next sync
+        return {"is_job_related": None, "category": "applied",
+                "company_name": "Unknown", "job_role": "Unknown",
+                "summary": "", "mail_summary": "", "next_step": ""}

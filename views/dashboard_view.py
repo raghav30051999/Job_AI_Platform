@@ -354,7 +354,8 @@ def render():
     line = f"scanning since {get_scan_since().strftime('%Y-%m-%d %H:%M')}"
     if rep:
         line += (f" · fetched {rep['fetched']} · duplicates skipped {rep['dup']}"
-                 f" · not job-related {rep['not_job']} · added {rep['added']}")
+                 f" · not job-related {rep['not_job']} · added {rep['added']}"
+                 f" · retry {rep.get('retry', 0)} · rescued {rep.get('reclassified', 0)}")
     st.caption(line)
 
     jobs = get_jobs()
