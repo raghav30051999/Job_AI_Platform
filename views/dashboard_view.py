@@ -249,9 +249,10 @@ def _recommendation_section():
     personal = bool(st.session_state.get("reco_personal", False)) and prof_on
     mode = ("personalized", "#1B7F3B") if personal else ("generic mode", "#B45309")
 
+    st.markdown("<div style='height:1.6rem'></div>", unsafe_allow_html=True)
     head, tog = st.columns([6, 3], vertical_alignment="center")
     head.markdown(
-        "<h3 style='margin:1.6rem 0 .7rem 0'>AI Based recommendation:"
+        "<h3 style='margin:0 0 .4rem 0'>AI Based recommendation:"
         "<span class='pill' style='background:#2563EB22;color:#2563EB'>beta</span>"
         f"<span class='pill' style='background:{mode[1]}22;color:{mode[1]}'>{mode[0]}</span></h3>",
         unsafe_allow_html=True)
