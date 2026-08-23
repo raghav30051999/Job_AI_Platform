@@ -26,7 +26,6 @@ When in doubt, prefer true for anything mentioning roles, resumes, or interviews
 
 
 def classify_email(subject, sender, body, attempts=3):
-    """Classify with automatic retry + backoff (survives free-tier 429 bursts)."""
     prompt = (
         f"SUBJECT: {subject}\n"
         f"FROM: {sender}\n"
@@ -50,9 +49,9 @@ def classify_email(subject, sender, body, attempts=3):
                 "next_step": r.get("next_step", ""),
             }
         except Exception as e:
-            last_err = f"{type(e).__name__}: {str(e)[:120]}"
+            last_err = f"{type(e).__name__}: {str(e)[:150]}"
             if i < attempts - 1:
-                time.sleep(5 * (i + 1))   # 5s, then 10s backoff
+                time.sleep(4 * (i + 1))
     return {"is_job_related": None, "category": "applied",
             "company_name": "Unknown", "job_role": "Unknown",
             "summary": "", "mail_summary": "", "next_step": "",

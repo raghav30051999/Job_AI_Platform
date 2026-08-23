@@ -1,5 +1,4 @@
 import os
-import logging
 import streamlit as st
 from google import genai
 
@@ -14,9 +13,7 @@ if not GEMINI_API_KEY:
 MODEL = "gemini-3.1-flash-lite"
 
 # Initialize client only if key exists (prevents crash on Cloud)
-client = None
-if GEMINI_API_KEY:
-    client = genai.Client(api_key=GEMINI_API_KEY)
+client = genai.Client(api_key=GEMINI_API_KEY) if GEMINI_API_KEY else None
 
 # Keep the terminal clean: only show real errors from the SDK
 logging.getLogger("google.genai").setLevel(logging.ERROR)
@@ -25,7 +22,7 @@ logging.getLogger("google.genai").setLevel(logging.ERROR)
 def generate_json(prompt, system_instruction=""):
     """Generate JSON from Gemini with proper error handling."""
     if client is None:
-        raise ValueError("GEMINI_API_KEY is missing. Add it to .env (local) or Streamlit Secrets (cloud).")
+        raise ValueError("GEMINI_API_KEY missing on this environment")
     
     response = client.models.generate_content(
         model=MODEL,
