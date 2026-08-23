@@ -360,7 +360,7 @@ def render():
         "<span style='color:#94A3B8'>→</span>"
         "<span style='background:#FFFFFF;border:1px solid #BFDBFE;color:#2563EB;padding:.22rem .65rem;border-radius:999px;font-weight:600'>📊 Updates the Job Offer in Dashboard + Suggests subsequent action</span>"
         "</div>"
-        "An <b>AI copilot</b> further ranks your live opportunities and suggests which offer deserves your acceptance first.<br>"
+        "An <b>AI Based recommendation system</b> further ranks your live opportunities and suggests which offer deserves your acceptance first.<br>"
         "<b>Want to try it live?</b> Jump to <b>🧪 Test by sending an email</b> at the bottom of this page — "
         "the sandbox inbox is pre-connected, so send a sample mail, press <b>🔄 Sync now</b>, "
         "and watch it flow through the pipeline into the tables above within seconds. "
