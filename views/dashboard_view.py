@@ -341,6 +341,21 @@ def render():
     </style>
     """, unsafe_allow_html=True)
 
+    st.markdown("<h2 style='margin:.5rem 0 .8rem 0'>💼 Job Dashboard</h2>",
+                unsafe_allow_html=True)
+    st.markdown(
+        "<div style='font-size:.85rem;color:#44566C;line-height:1.55;margin:0 0 1rem 0'>"
+        "<b>How this demo works:</b> the app securely connects to a sandbox email inbox (Mailtrap), "
+        "fetches recent emails, and a Gemini AI classifier reads each one. Genuine job-related mails "
+        "(applications, shortlists, interview invites, offers) are extracted into structured cards with "
+        "company, role and next step, while duplicates and newsletters are filtered out automatically. "
+        "Try it live — open <b>🧪 Test by sending an email</b> at the bottom, send a sample mail, press "
+        "<b>🔄 Sync now</b>, and watch it appear in the tables below."
+        "</div>",
+        unsafe_allow_html=True)
+
+    ok = STATUS["last_err"] is None
+
     ok = STATUS["last_err"] is None
     chip_class = "chip-ok" if ok else "chip-err"
     if ok:
@@ -439,17 +454,24 @@ def render():
     _spacer("2rem")
 
     # Feedback shown OUTSIDE the dropdown so it's visible even when collapsed
+        # Feedback shown OUTSIDE the dropdown so it's visible even when collapsed
     tmsg = st.session_state.get("test_msg")
     if tmsg:
         if tmsg.startswith("✅"):
             st.success(tmsg)
+            # One-click sync right next to the banner — no expander hunting
+            if st.button("🔄 Sync now", key="sync_after_send", width="stretch"):
+                st.session_state.pop("test_msg", None)
+                sync_now()
+                st.rerun()
         elif tmsg.startswith("❌"):
             st.error(tmsg)
         else:
             st.warning(tmsg)
 
-    # Collapsed by default — opens only when the user clicks the arrow
-    with st.expander("🧪 Test by sending an email"):
+    # Stays OPEN while a test message is pending; collapsed otherwise
+    with st.expander("🧪 Test by sending an email", expanded=bool(tmsg)):
+
         st.caption("Type or paste any email text and send it into the sandbox. "
                    "The AI decides whether it's an application response or a cold offer.")
         frm = st.text_input("From (optional)", value="Recruiter <recruiter@company.com>")
