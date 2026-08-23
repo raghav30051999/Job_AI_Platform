@@ -398,6 +398,36 @@ def render():
                             width="stretch",
                             config={"displayModeBar": False, "displaylogo": False})
 
+    with st.expander("🩺 API diagnostics (cloud debugging)"):
+        st.caption("Makes one tiny generate call + one embedding call and shows the EXACT "
+                   "status code and message Google returns.")
+        if st.button("Run diagnostic", key="run_diag"):
+            import os as _os
+            from google import genai as _genai
+
+            key = _os.getenv("GEMINI_API_KEY")
+            if not key:
+                try:
+                    key = st.secrets["GEMINI_API_KEY"]
+                except Exception:
+                    key = None
+            st.write(f"Key loaded: {'✅' if key else '❌'} · length {len(key or '')} "
+                     f"· starts with '{(key or '')[:4]}…'")
+
+            if key:
+                c = _genai.Client(api_key=key)
+                try:
+                    r = c.models.generate_content(
+                        model="gemini-3.1-flash-lite", contents="Reply with the word pong")
+                    st.success(f"✅ Generate OK → {r.text[:40]}")
+                except Exception as e:
+                    st.error(f"❌ generate: {type(e).__name__} · HTTP {getattr(e, 'code', '?')} · {str(e)[:500]}")
+                try:
+                    c.models.embed_content(model="text-embedding-004", contents="ping")
+                    st.success("✅ Embeddings OK")
+                except Exception as e:
+                    st.error(f"❌ embed: {type(e).__name__} · HTTP {getattr(e, 'code', '?')} · {str(e)[:500]}")
+
     _table_section("Applied Jobs", "📝", applied, "applied", BLUE)
     _table_section("Job Offers without prior application", "🎯", cold, "cold", AMBER)
        
