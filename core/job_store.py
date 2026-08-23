@@ -2,6 +2,7 @@ import os
 import json
 import hashlib
 from core.email_classifier import classify_email
+from core.dedup import is_hard_duplicate
 
 DB_DIR = "db"
 JOBS_PATH = os.path.join(DB_DIR, "jobs.json")

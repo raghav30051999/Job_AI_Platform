@@ -8,6 +8,7 @@ from core.settings import get_scan_since
 from core.smtp_sender import send_test_email
 from core.recommender import get_recommendations
 from core.profile_rag import has_profile
+from core.dedup import collapse_duplicates
 
 
 BLUE, AMBER, NAVY = "#2563EB", "#F59E0B", "#16324F"
@@ -174,7 +175,15 @@ def _job_row(mid, d):
     c[0].checkbox(f"Select {d['id']}", key=f"sel_{d['id']}", label_visibility="collapsed")
     c[1].markdown(f"<div class='td-id'>{d['id']}</div>", unsafe_allow_html=True)
     c[2].markdown(f"<div class='td'>{d['sender']}</div>", unsafe_allow_html=True)
-    c[3].markdown(f"<div class='td'>{d['job_role']}</div>", unsafe_allow_html=True)
+    if d.get("dup_count"):
+        c[3].markdown(
+            f"<div class='td'>{d['job_role']} "
+            f"<span style='background:#FEF3C7; color:#92400E; padding:1px 6px; "
+            f"border-radius:10px; font-size:0.7rem; font-weight:600; margin-left:6px;'>"
+            f"×{d['dup_count']}</span></div>", 
+            unsafe_allow_html=True)
+    else:
+        c[3].markdown(f"<div class='td'>{d['job_role']}</div>", unsafe_allow_html=True)
     c[4].markdown(f"<div class='td-summary'>{d.get('mail_summary', '')}</div>", unsafe_allow_html=True)
     c[5].markdown(f"<div class='td-summary'>{d['summary']}</div>", unsafe_allow_html=True)
     c[6].markdown(f"<div class='td-next'>➤ {d.get('next_step', '')}</div>", unsafe_allow_html=True)
@@ -349,7 +358,15 @@ def render():
     st.caption(line)
 
     jobs = get_jobs()
-    pairs = [(mid, _disp(j)) for mid, j in jobs.items()]
+    # Inject message_id into display dict so we don't lose it during collapse
+    raw_dicts = []
+    for mid, j in jobs.items():
+        d = _disp(j)
+        d["_mid"] = mid
+        raw_dicts.append(d)
+        
+    collapsed_dicts = collapse_duplicates(raw_dicts, threshold=2)
+    pairs = [(d["_mid"], d) for d in collapsed_dicts]
     visible = [(mid, d) for mid, d in pairs if d.get("category") in ("applied", "cold_offer")]
     applied = [(mid, d) for mid, d in visible if d["category"] == "applied"]
     cold = [(mid, d) for mid, d in visible if d["category"] == "cold_offer"]

@@ -1144,9 +1144,12 @@ def _profile_uploader():
         if b1.button("💾 Save & Index", width="stretch", key="prof_save"):
             if txt.strip():
                 with st.spinner("Chunking & embedding profile..."):
-                    meta = save_profile(txt)
-                st.session_state["clear_profile_box"] = True
-                st.session_state["flash_msg"] = f"✅ Indexed {meta['chunks']} chunks."
+                    try:
+                        meta = save_profile(txt)
+                        st.session_state["clear_profile_box"] = True
+                        st.session_state["flash_msg"] = f"✅ Indexed {meta['chunks']} chunks."
+                    except Exception as e:
+                        st.session_state["flash_msg"] = f"⚠️ Indexing paused due to API rate limits. Please wait 1 minute and try again. ({type(e).__name__})"
                 st.rerun()
             else:
                 st.warning("Paste your profile first.")
@@ -1155,22 +1158,27 @@ def _profile_uploader():
                      disabled=not bool(prof)):
             if txt.strip():
                 with st.spinner("Appending & embedding new chunks..."):
-                    meta = append_profile(txt)
-                st.session_state["clear_profile_box"] = True
-                st.session_state["flash_msg"] = (f"✅ Appended · {meta['chunks']} chunks total "
-                                                 f"({meta.get('new_embeds', 0)} new embeddings).")
+                    try:
+                        meta = append_profile(txt)
+                        st.session_state["clear_profile_box"] = True
+                        st.session_state["flash_msg"] = (f"✅ Appended · {meta['chunks']} chunks total "
+                                                         f"({meta.get('new_embeds', 0)} new embeddings).")
+                    except Exception as e:
+                        st.session_state["flash_msg"] = f"⚠️ Indexing paused due to API rate limits. Please wait 1 minute and try again. ({type(e).__name__})"
                 st.rerun()
             else:
                 st.warning("Paste the new data first.")
 
         if b3.button("📥 Load demo profile", width="stretch", key="prof_sample"):
             with st.spinner("Loading & indexing demo profile..."):
-                meta = save_profile(SAMPLE_PROFILE, source="demo")
-            st.session_state["load_sample"] = True
-            st.session_state["flash_msg"] = (f"✅ Demo profile loaded & indexed · {meta['chunks']} chunks. "
-                                             "Paste a JD below and press Generate!")
+                try:
+                    meta = save_profile(SAMPLE_PROFILE, source="demo")
+                    st.session_state["load_sample"] = True
+                    st.session_state["flash_msg"] = (f"✅ Demo profile loaded & indexed · {meta['chunks']} chunks. "
+                                                     "Paste a JD below and press Generate!")
+                except Exception as e:
+                    st.session_state["flash_msg"] = f"⚠️ Demo indexing paused due to API rate limits. Please wait 1 minute and try again. ({type(e).__name__})"
             st.rerun()
-
 
 def _resume_text(res):
     c = res.get("contact") or {}

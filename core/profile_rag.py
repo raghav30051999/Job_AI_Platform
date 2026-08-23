@@ -108,6 +108,7 @@ def save_profile(text, source="pasted"):
         if vec is None:
             vec = embed_text(c["text"])
             new_embeds += 1
+            time.sleep(0.2)
         index.append({
             "id": f"PC-{len(index) + 1:03d}",
             "section": c["section"],
