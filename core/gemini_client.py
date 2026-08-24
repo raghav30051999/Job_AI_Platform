@@ -13,7 +13,7 @@ if not GEMINI_API_KEY:
     except Exception:
         GEMINI_API_KEY = None
 
-MODEL = "gemini-3.1-flash-lite"   # your quota-friendly model — unchanged
+MODEL = "gemini-2.5-flash"   # your quota-friendly model — unchanged
 
 # Initialize client only if key exists (prevents crash on Cloud)
 client = genai.Client(api_key=GEMINI_API_KEY) if GEMINI_API_KEY else None
