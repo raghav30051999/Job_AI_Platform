@@ -154,6 +154,20 @@ def _extract_contact(text):
 
 
 # ---------------------------------------------------------------- education (robust parse)
+_DEGREE_KW = re.compile(
+    r"(bachelor|master|b\.?tech|m\.?tech|b\.?e\b|m\.?e\b|b\.?sc|m\.?sc|bca|mca|mba|ph\.?d|"
+    r"diploma|intermediate|ssc|cbse|icse|10th|12th|secondary|high school|"
+    r"b\.?com|m\.?com|b\.?a\b|m\.?a\b|degree|qualification)", re.I)
+_INST_KW = re.compile(
+    r"(university|college|institute|institution|school|academy|campus)", re.I)
+_SCORE_RE = re.compile(
+    r"(CGPA|GPA|Percentage|Percent|Grade|Marks)\s*[:\-]?\s*([\d.]+)\s*%?", re.I)
+_YEAR_RE = re.compile(r"\d{4}\s*[-–]\s*\d{4}")
+
+
+def _norm_s(x):
+    return re.sub(r"[^a-z0-9]+", " ", (x or "").lower()).strip()
+
 def _extract_education_block(profile_text):
     """Pull the raw EDUCATION section straight from the saved profile text."""
     lines = (profile_text or "").split("\n")
@@ -165,6 +179,9 @@ def _extract_education_block(profile_text):
                        or up in ("ACADEMIC QUALIFICATIONS", "EDUCATIONAL QUALIFICATIONS", "ACADEMICS")))
         is_other_head = (bool(s) and s == up and len(s) < 50
                          and not re.search(r"\d", s) and re.match(r"^[A-Z &/]+$", s))
+        # ALL-CAPS degree/institution lines are CONTENT, not section boundaries
+        if is_other_head and (_DEGREE_KW.search(s) or _INST_KW.search(s)):
+            is_other_head = False
         if is_edu_head:
             in_edu = True
             continue
@@ -173,19 +190,6 @@ def _extract_education_block(profile_text):
         if in_edu:
             block.append(ln)
     return "\n".join(block)
-
-
-_DEGREE_KW = re.compile(
-    r"(bachelor|master|b\.?tech|m\.?tech|b\.?e\b|m\.?e\b|b\.?sc|m\.?sc|bca|mca|mba|ph\.?d|"
-    r"diploma|intermediate|ssc|cbse|icse|10th|12th|secondary|high school|"
-    r"b\.?com|m\.?com|b\.?a\b|m\.?a\b|degree|qualification)", re.I)
-_INST_KW = re.compile(r"(university|college|institute|institution|school|academy|campus)", re.I)
-_SCORE_RE = re.compile(r"(CGPA|GPA|Percentage|Percent|Grade|Marks)\s*[:\-]?\s*([\d.]+)\s*%?", re.I)
-_YEAR_RE = re.compile(r"\d{4}\s*[-–]\s*\d{4}")
-
-
-def _norm_s(x):
-    return re.sub(r"[^a-z0-9]+", " ", (x or "").lower()).strip()
 
 
 def _fields_from_block(blk):
@@ -208,10 +212,14 @@ def _fields_from_block(blk):
             degree = parts[0]
         if not inst and len(parts) > 1 and parts[1] != degree:
             inst = parts[1]
+    # last resort for degree: first line that is NOT institution/score/year;
+    # if none exists, leave degree EMPTY so the fragment merges complementarily
     if not degree and lines:
-        degree = lines[0]
-        if not inst and len(lines) > 1 and not _SCORE_RE.match(lines[1]):
-            inst = lines[1]
+        for l in lines:
+            if _INST_KW.search(l) or _SCORE_RE.match(l) or _YEAR_RE.search(l):
+                continue
+            degree = l
+            break
     ym = _YEAR_RE.search(blk)
     sm = _SCORE_RE.search(blk)
     return {"degree": degree, "institution": inst,
@@ -220,19 +228,26 @@ def _fields_from_block(blk):
 
 
 def _parse_edu_blocks(text):
+    """A new entry starts only at a NEW degree-keyword line, or at a blank line
+    after an already-COMPLETE entry — blank lines inside an entry never split it."""
     entries, cur = [], []
+    has_deg = has_inst = False
     for ln in (text or "").splitlines():
         s = ln.strip()
         if not s:
-            if cur:
+            if cur and has_deg and has_inst:
                 entries.append("\n".join(cur))
-                cur = []
+                cur, has_deg, has_inst = [], False, False
             continue
-        if cur and _DEGREE_KW.search(s) and any(_DEGREE_KW.search(x) for x in cur):
+        is_deg = bool(_DEGREE_KW.search(s))
+        if cur and is_deg and has_deg:
             entries.append("\n".join(cur))
-            cur = [s]
-        else:
-            cur.append(s)
+            cur, has_deg, has_inst = [], False, False
+        cur.append(s)
+        if is_deg:
+            has_deg = True
+        if _INST_KW.search(s):
+            has_inst = True
     if cur:
         entries.append("\n".join(cur))
     return [_fields_from_block(b) for b in entries]
@@ -247,10 +262,12 @@ def _mergeable(a, b):
         return True
     same_score = a["score"] and a["score"] == b["score"]
     same_year = a["year"] and a["year"] == b["year"]
-    if same_score or same_year:
-        # complementary fragments: one holds degree, the other institution
-        if ((not da) != (not db)) and ((not ia) != (not ib)):
-            return True
+    # strict complement: one holds degree, the other institution
+    if (same_score or same_year) and ((not da) != (not db)) and ((not ia) != (not ib)):
+        return True
+    # one side incomplete, the other carries the missing half, same score
+    if same_score and (da or db) and (ia or ib) and ((not da or not db) or (not ia or not ib)):
+        return True
     return False
 
 
