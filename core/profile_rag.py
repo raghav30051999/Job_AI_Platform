@@ -16,8 +16,14 @@ HEADINGS = ["summary", "objective", "about", "skills", "technical skills",
             "experience", "work experience", "employment", "education",
             "projects", "certifications", "achievements", "internship"]
 
+# Keywords that identify REAL section headings. An ALL-CAPS line is only a
+# heading if it contains one of these — so person names stay content.
+_SECTION_KW = ("summary", "objective", "about", "skill", "experience", "employment",
+               "work", "education", "academic", "project", "certif", "achieve",
+               "intern", "language", "strength", "interest", "qualification", "profile")
 
-# ---------------------------------------------------------------- ingestion (unchanged)
+
+# ---------------------------------------------------------------- ingestion
 def _norm(t):
     return re.sub(r"\s+", " ", t or "").strip()
 
@@ -27,9 +33,15 @@ def _is_heading(line):
     if not s or len(s) > 60:
         return False
     low = s.lower().rstrip(":")
-    return (low in HEADINGS
-            or (len(s) < 40 and s.endswith(":"))
-            or (s.isupper() and len(s) < 40))
+    if low in HEADINGS:
+        return True
+    if len(s) < 40 and s.endswith(":"):
+        return True
+    if s.isupper() and len(s) < 40:
+        # "WORK EXPERIENCE" / "EDUCATION" stay headings;
+        # "RAGHAV NAVEEN V" stays CONTENT (fixes missing name).
+        return any(k in low for k in _SECTION_KW)
+    return False
 
 
 def _section_of(heading):
@@ -51,7 +63,7 @@ def chunk_profile(text):
         if not body:
             return
         if cur_head == "project":
-        # one chunk per project entry (title line + its description)
+            # one chunk per project entry (title line + its description)
             paras, buf = [], ""
             for ln in body.splitlines():
                 s = ln.strip()
@@ -91,7 +103,7 @@ def chunk_profile(text):
     return [{"section": s, "text": t} for s, t in chunks]
 
 
-# ---------------------------------------------------------------- storage (unchanged)
+# ---------------------------------------------------------------- storage
 def save_profile(text, source="pasted", progress_cb=None):
     text = (text or "").strip()
     if not text:
@@ -144,6 +156,7 @@ def append_profile(new_text, source="append", progress_cb=None):
     base = (prof or {}).get("text", "").strip()
     full = (base + "\n\n" + new_text) if base else new_text
     return save_profile(full, source=source, progress_cb=progress_cb)
+
 
 def get_profile():
     if not os.path.exists(PROFILE_PATH):
@@ -216,7 +229,7 @@ class _BM25:
                 continue
             dfw = self.df.get(w, 0)
             idf = math.log(1 + (self.N - dfw + 0.5) / (dfw + 0.5))
-            s += idf * (f * (self.k1 + 1)) / (f + self.k1 * (1 - self.b + self.b * self.doc_len[i] / self.avgdl))
+            s = idf * (f * (self.k1 + 1)) / (f + self.k1 * (1 - self.b + self.b * self.doc_len[i] / self.avgdl))
         return s
 
 
@@ -341,6 +354,7 @@ def fit_score(job_text):
     if not res:
         return None
     return round(max(0.0, min(100.0, 100 * sum(s for s, _ in res) / len(res))), 1)
+
 
 def section_top(query, section, k=2):
     """Best chunks of ONE section for the query (BM25); always returns up to k."""
