@@ -165,6 +165,15 @@ _SCORE_RE = re.compile(
 _YEAR_RE = re.compile(r"\d{4}\s*[-–]\s*\d{4}")
 
 
+def _strip_year_from_degree(degree):
+    """Remove embedded year ranges from degree text so 'B.Tech 2016-2020 — College'
+    matches 'B.Tech'."""
+    if not degree:
+        return degree
+    cleaned = re.sub(r'\s*\d{4}\s*[-–]\s*\d{4}\s*', ' ', degree).strip()
+    cleaned = re.sub(r'[\s,|;—–\-]+$', '', cleaned)
+    return cleaned
+
 def _norm_s(x):
     return re.sub(r"[^a-z0-9]+", " ", (x or "").lower()).strip()
 
@@ -254,43 +263,67 @@ def _parse_edu_blocks(text):
 
 
 def _mergeable(a, b):
-    da, ia = _norm_s(a["degree"]), _norm_s(a["institution"])
-    db, ib = _norm_s(b["degree"]), _norm_s(b["institution"])
+    da_raw, ia = a.get("degree", ""), a.get("institution", "")
+    db_raw, ib = b.get("degree", ""), b.get("institution", "")
     sa, sb = a.get("score", ""), b.get("score", "")
     ya, yb = a.get("year", ""), b.get("year", "")
-    
-    # Same degree + same institution (or one empty)
-    if da and da == db and (not ia or not ib or ia == ib):
+
+    # Normalize AFTER stripping embedded years (this is the key fix)
+    da = _norm_s(_strip_year_from_degree(da_raw))
+    db = _norm_s(_strip_year_from_degree(db_raw))
+    ia_n, ib_n = _norm_s(ia), _norm_s(ib)
+
+    # Same degree (years stripped) + compatible institution
+    if da and da == db and (not ia_n or not ib_n or ia_n == ib_n):
         return True
-    if ia and ia == ib and (not da or not db or da == db):
+    if ia_n and ia_n == ib_n and (not da or not db or da == db):
         return True
-    
+
     # Same score AND same year = strong signal they're the same entry
     if sa and sa == sb and ya and ya == yb:
         # One has degree/institution, merge them
-        if (da or ia) and not (db or ib):
+        if (da or ia_n) and not (db or ib_n):
             return True
-        if (db or ib) and not (da or ia):
+        if (db or ib_n) and not (da or ia_n):
             return True
         # Both have degree+institution, merge if compatible
-        if (da or ia) and (db or ib):
-            if (not da or not db or da == db) and (not ia or not ib or ia == ib):
+        if (da or ia_n) and (db or ib_n):
+            if (not da or not db or da == db) and (not ia_n or not ib_n or ia_n == ib_n):
                 return True
-    
+
     # Complementary fragments: one has degree, other has institution, share score or year
     same_score = sa and sa == sb
     same_year = ya and ya == yb
-    if (same_score or same_year) and ((not da) != (not db)) and ((not ia) != (not ib)):
+    if (same_score or same_year) and ((not da) != (not db)) and ((not ia_n) != (not ib_n)):
         return True
-    
+
+    # Same year + same degree-keyword + compatible institution
+    # Catches "B.Tech, EEE 2016-2020 — Pragati" vs "B.Tech, EEE"
+    if same_year:
+        kw_a = _DEGREE_KW.search(da_raw or "")
+        kw_b = _DEGREE_KW.search(db_raw or "")
+        if kw_a and kw_b and kw_a.group(0).lower() == kw_b.group(0).lower():
+            if (not ia_n or not ib_n or ia_n == ib_n or
+                    ia_n in ib_n or ib_n in ia_n):
+                return True
+
     return False
 
-
-def _merge_into(a, b):
-    for k in ("degree", "institution", "year", "score"):
-        if not a[k]:
-            a[k] = b[k]
-
+def _merge_into(target, source):
+    for k in ("institution", "year", "score"):
+        if not target[k]:
+            target[k] = source[k]
+    # For degree: prefer the cleaner version (no embedded year, shorter)
+    if not target["degree"]:
+        target["degree"] = source["degree"]
+    elif source["degree"]:
+        src_clean = _strip_year_from_degree(source["degree"])
+        tgt_clean = _strip_year_from_degree(target["degree"])
+        # prefer the one without embedded year, or shorter after stripping
+        if not _YEAR_RE.search(source["degree"]) and _YEAR_RE.search(target["degree"]):
+            target["degree"] = source["degree"]
+        elif len(src_clean) < len(tgt_clean) and len(src_clean) > 10:
+            target["degree"] = source["degree"]
 
 def _final_education(draft, evidence):
     """Single source of truth for education: parse raw profile + evidence + model
