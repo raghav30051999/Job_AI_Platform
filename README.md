@@ -6,7 +6,12 @@ To address the other side of the job-search process i.e. applying for jobs — o
 
 The RAG pipeline is also evaluated to measure the quality and reliability of retrieval and generated responses.
 
+🔗 **Quick Project Tour required ? Click here :**[https://raghav30051999.github.io/Job_AI_Platform/]
+
+
 🔗 **Wanna try this ? Click here :** [https://jobaiplatform-rtrignv3fkd8tqzdzs9yxw.streamlit.app/]
+
+
 
 ---
 
