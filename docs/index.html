@@ -1,0 +1,267 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Job Platform — Interactive Demo</title>
+<style>
+  body{font-family:system-ui,'Segoe UI',sans-serif;margin:0;background:#F8FAFC;color:#16324F}
+  header{padding:1rem 2rem;background:#16324F;color:#fff;display:flex;justify-content:space-between;align-items:center}
+  header h1{margin:0;font-size:1.25rem}
+  .row{display:grid;grid-template-columns:7fr 2fr;gap:1.5rem;padding:1.25rem 2rem;align-items:start}
+  .frame{position:sticky;top:1rem;border:1px solid #E3EAF3;border-radius:14px;overflow:hidden;background:#fff;box-shadow:0 4px 14px #16324F14}
+  iframe{width:100%;height:88vh;border:0;display:block}
+  .chip{position:sticky;top:1rem;display:inline-block;font-size:.72rem;font-weight:700;color:#2563EB;background:#2563EB14;border-radius:999px;padding:.25rem .7rem;margin-bottom:1rem;z-index:5}
+  .step{min-height:72vh;opacity:.3;transition:opacity .35s;padding:1rem 0}
+  .step.active{opacity:1}
+  .step h2{margin:.2rem 0 .6rem;font-size:1.35rem}
+  .step p{line-height:1.65;color:#44566C;font-size:.95rem}
+  @media(max-width:900px){.row{grid-template-columns:1fr}.frame{position:static}iframe{height:70vh}}
+</style>
+</head>
+<body>
+<header>
+  <h1>🤖 AI Job Platform — live, guided demo</h1>
+  <span style="font-size:.8rem">scroll the notes — the live app follows</span>
+</header>
+
+<div class="row">
+  <div class="frame">
+    <iframe id="app" src="https://jobaiplatform-rtrignv3fkd8tqzdzs9yxw.streamlit.app/?page=dashboard&embed=true"></iframe>
+  </div>
+
+  <div class="desc">
+    <span class="chip" id="now">You're viewing: Job Dashboard</span>
+
+    <section class="step active" data-page="dashboard" data-label="Job Dashboard">
+      <h2>💼 Job Dashboard</h2>
+      <p><b>Charts :</b> <br>Donut Chart: Displays the total number of job-related emails received in the inbox.<br>
+      2. Bar Chart: Shows the number of emails received over the past 10 days.<br></br>
+      <b>Best features in Tables :</b><br>
+      ➤ <b>AI-Generated Summary:</b> A brief overview of the company, generated automatically using AI.<br>
+      ➤ <b>AI-Recommended Next Steps:</b> Suggests the best subsequent action based on the email content.<br></br>
+
+      <b>AI Based Recommendation System : </b> <br>
+      The recommendation system operates in two modes:<br>
+      <b>1.Generic Mode: </b>Analyzes all received job opportunities and identifies the best overall opportunity based on general job-related criteria.<br>
+      <b>2.Personalized Mode : </b> Analyzes the received job opportunities against the user's profile and recommends the opportunity that best matches their skills, experience, and career profile.<br></br>
+      
+      <b>Testing section : </b><br>
+      A sandbox email account, pre-connected to the project, is provided, allowing you to instantly test the dashboard by sending job-related emails from a recruiter’s perspective.
+    
+    </p>
+    </section>
+
+
+    <section class="step" data-page="tailor" data-scroll="My Profile" data-label="Resume Designer — Profile">
+    <h2>📄 Resume Designer — Profile</h2>
+    <p><b>My Profile :</b> <br>
+    Paste your resume once — the AI chops it into pieces and indexes the profile.<br>
+    ➤ <b>Append & Re-index:</b> Adds new text (a project documentation, skill or certification) to the existing profile without rewriting the entire profile.<br></br>
+
+    <b>Job Description :</b> <br>
+    Paste the full JD you want to target — then an AI Model retrieves the most relevant chunks of your profile and writes a structured, ATS-friendly resume for this exact job.<br>
+
+  <h2>✨ Tailored Resume — what you get</h2>
+  <p><b>Generated resume :</b> <br>
+  1. Match Score: Shows how strongly your profile fits the JD, as a percentage.<br>
+  2. Grounded Content: Every summary, skill and bullet comes from your real evidence — the editor polishes words but never changes facts.<br>
+  3. Watch-outs: Highlights genuine skill gaps and areas for improvement. These are not included in the resume, as they are not part of the user’s actual profile.<br>
+  4. The generated resume will be available in three formats: downloadable text, Word document, and PDF.<br></br>
+  
+  <b>Main Use case : </b><br>
+  Regularly updating the profile with precise and accurate information about projects, skills, and certifications enables the system to instantly generate a more accurate, effective and Job-ready resume.
+  
+
+  </p>
+</section>
+
+    
+    <section class="step" data-page="eval" data-label="RAG Eval Lab">
+      <h2>🧪 RAG Eval Lab</h2>
+      <p>The quality gate: retrieval recall, faithfulness, citation accuracy, unsupported-claim rate,
+      latency and cost per run. It proves every resume claim is backed by retrieved evidence.</p>
+    </section>
+  </div>
+</div>
+
+<script>
+var APP = "https://jobaiplatform-rtrignv3fkd8tqzdzs9yxw.streamlit.app/";
+var iframe = document.getElementById("app");
+var current = "dashboard";
+
+var io = new IntersectionObserver(function(entries){
+  entries.forEach(function(en){
+    if (!en.isIntersecting) return;
+    var s = en.target;
+    document.querySelectorAll(".step").forEach(function(x){
+      x.classList.toggle("active", x === s);
+    });
+    document.getElementById("now").textContent = "You're viewing: " + s.dataset.label;
+    if (s.dataset.page !== current){          // switch live app only when page changes
+      current = s.dataset.page;
+      iframe.src = APP + "?page=" + current + "&embed=true";
+    }
+  });
+}, {rootMargin: "-45% 0px -55% 0px"});        // fires when a step crosses the middle band
+
+document.querySelectorAll(".step").forEach(function(s){ io.observe(s); });
+</script>
+</body>
+</html> -->
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Job Platform — Interactive Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  body{font-family:'Inter',system-ui,'Segoe UI',sans-serif;margin:0;background:#F8FAFC;color:#16324F}
+  header{padding:1rem 2rem;background:#16324F;color:#fff;display:flex;justify-content:space-between;align-items:center}
+  header h1{margin:0;font-size:1.25rem;font-family:'Manrope',sans-serif;letter-spacing:.01em}
+  .row{display:grid;grid-template-columns:7fr 2fr;gap:1.5rem;padding:1.25rem 2rem;align-items:start}
+  .frame{position:sticky;top:1rem;border:1px solid #E3EAF3;border-radius:14px;overflow:hidden;background:#fff;box-shadow:0 4px 14px #16324F14}
+  iframe{width:100%;height:88vh;border:0;display:block}
+
+  .chip{position:sticky;top:1rem;display:inline-block;font-size:.7rem;font-weight:700;color:#fff;
+        background:linear-gradient(135deg,#2563EB,#7C3AED);border-radius:999px;padding:.3rem .8rem;
+        margin-bottom:.9rem;z-index:5;box-shadow:0 3px 10px #2563EB40}
+
+  /* ---- right-side description cards ---- */
+  .step{min-height:64vh;background:#fff;border:1px solid #E3EAF3;border-radius:16px;
+        padding:1.3rem 1.4rem;margin:1.1rem 0;opacity:.35;transition:all .35s ease;
+        box-shadow:0 2px 10px #16324F0A}
+  .step.active{opacity:1;border-color:#2563EB55;box-shadow:0 10px 28px #2563EB1F;transform:translateY(-2px)}
+  .step h2{font-family:'Manrope',sans-serif;font-size:1.28rem;font-weight:800;margin:.1rem 0 .7rem;
+           padding-bottom:.55rem;border-bottom:2px solid #2563EB22}
+  .step p{line-height:1.7;color:#44566C;font-size:.93rem;margin:0}
+  .step b{color:#16324F;font-weight:700}
+
+  /* auto-decorated line types */
+  .mini{margin:1rem 0 .35rem;font-size:.72rem;letter-spacing:.09em;text-transform:uppercase;
+        color:#2563EB;font-weight:800}
+  .mini b{color:inherit}
+  .mini::before{content:"";display:inline-block;width:.55rem;height:.55rem;border-radius:2px;
+        background:linear-gradient(135deg,#2563EB,#7C3AED);margin-right:.45rem;vertical-align:middle}
+  .ln{margin:.3rem 0}
+  .bullet{background:#F1F5F9;border-left:3px solid #2563EB;border-radius:8px;
+        padding:.45rem .7rem;margin:.5rem 0;color:#44566C}
+  .bullet .ar{color:#2563EB;margin-right:.4rem}
+  .num{margin:.4rem 0}
+  .num .nn{display:inline-flex;align-items:center;justify-content:center;width:1.25rem;height:1.25rem;
+        border-radius:50%;background:#2563EB14;color:#2563EB;font-weight:800;font-size:.72rem;
+        margin-right:.5rem;vertical-align:middle}
+
+  @media(max-width:900px){.row{grid-template-columns:1fr}.frame{position:static}iframe{height:70vh}}
+</style>
+</head>
+<body>
+<header>
+  <h1>🤖 AI Job Platform — Interactive Demo</h1>
+  <span style="font-size:.8rem">scroll the notes — the live app follows</span>
+</header>
+
+<div class="row">
+  <div class="frame">
+    <iframe id="app" src="https://jobaiplatform-rtrignv3fkd8tqzdzs9yxw.streamlit.app/?page=dashboard&embed=true"></iframe>
+  </div>
+
+  <div class="desc">
+    <span class="chip" id="now">You're viewing: Job Dashboard</span>
+
+    <section class="step active" data-page="dashboard" data-label="Job Dashboard">
+      <h2>💼 Job Dashboard</h2>
+      <p><b>Charts :</b> <br>1.Donut Chart: Displays the total number of job-related emails received in the inbox.<br>
+      2. Bar Chart: Shows the number of emails received over the past 10 days.<br></br>
+      <b>Best features in Tables :</b><br>
+      ➤ <b>AI-Generated Summary:</b> A brief overview of the company, generated automatically using AI.<br>
+      ➤ <b>AI-Recommended Next Steps:</b> Suggests the best subsequent action based on the email content.<br></br>
+      <b>AI Based Recommendation System :</b> <br>
+      The recommendation system operates in two modes:<br>
+      <b>1.Generic Mode: </b>Analyzes all received job opportunities and identifies the best overall opportunity based on general job-related criteria.<br>
+      <b>2.Personalized Mode : </b> Analyzes the received job opportunities against the user's profile and recommends the opportunity that best matches their skills, experience, and career profile.<br></br>
+
+      <b>Testing section :</b> <br>
+      A sandbox email account, pre-connected to the project, is provided, allowing you to instantly test the dashboard by sending job-related emails from a recruiter’s perspective.
+    </p>
+    </section>
+
+    <section class="step" data-page="tailor" data-scroll="My Profile" data-label="Resume Designer — Profile">
+    <h2>📄 Resume Designer — Profile</h2>
+    <p><b>My Profile :</b> <br>
+    Paste your resume once — the AI chops it into pieces and indexes the profile.<br>
+    ➤ <b>Append & Re-index:</b> Adds new text (a project documentation, skill or certification) to the existing profile without rewriting the entire profile.<br></br>
+
+    <b>Job Description :</b> <br>
+    Paste the full JD you want to target — then an AI Model retrieves the most relevant chunks of your profile and writes a structured, ATS-friendly resume for this exact job.<br>
+
+  <h2>✨ Tailored Resume — what you get</h2>
+  <p><b>Generated resume :</b> <br>
+  1. Match Score: Shows how strongly your profile fits the JD, as a percentage.<br>
+  2. Grounded Content: Every summary, skill and bullet comes from your real evidence — the editor polishes words but never changes facts.<br>
+  3. Watch-outs: Highlights genuine skill gaps and areas for improvement. These are not included in the resume, as they are not part of the user’s actual profile.<br>
+  4. The generated resume will be available in three formats: downloadable text, Word document, and PDF.<br></br>
+
+  <b>Main Use case :</b> <br>
+  Regularly updating the profile with precise and accurate information about projects, skills, and certifications enables the system to instantly generate a more accurate, effective and Job-ready resume.
+  </p>
+</section>
+
+    <section class="step" data-page="eval" data-label="RAG Eval Lab">
+      <h2>🧪 RAG Eval Lab</h2>
+      <p>The quality gate: retrieval recall, faithfulness, citation accuracy, unsupported-claim rate,
+      latency and cost per run is provided for reference. It proves every resume claim is backed by retrieved evidence.</p>
+    </section>
+  </div>
+</div>
+
+<script>
+/* ---- auto-decorator: dresses your existing writing style ---- */
+document.querySelectorAll(".step p").forEach(function(p){
+  var lines = p.innerHTML.split(/<br\s*\/?>|<\/br>/gi);
+  var html = "";
+  lines.forEach(function(raw){
+    var line = raw.trim();
+    if (!line) return;
+    if (/^<b>[\s\S]{1,70}:<\/b>$/.test(line)){                      /* <b>Header :</b>  */
+      html += '<div class="mini">' + line + '</div>';
+    } else if (line.indexOf("➤") === 0){                            /* ➤ bullets        */
+      html += '<div class="ln bullet">' + line.replace("➤", '<span class="ar">➤</span>') + '</div>';
+    } else if (/^\d+\s*[.)]/.test(line)){                           /* 1. numbered      */
+      html += '<div class="ln num">' + line.replace(/^(\d+)\s*[.)]\s*/, '<span class="nn">$1</span>') + '</div>';
+    } else {
+      html += '<div class="ln">' + line + '</div>';
+    }
+  });
+  p.innerHTML = html;
+});
+
+/* ---- scroll controller (unchanged) ---- */
+var APP = "https://jobaiplatform-rtrignv3fkd8tqzdzs9yxw.streamlit.app/";
+var iframe = document.getElementById("app");
+var current = "dashboard";
+
+var io = new IntersectionObserver(function(entries){
+  entries.forEach(function(en){
+    if (!en.isIntersecting) return;
+    var s = en.target;
+    document.querySelectorAll(".step").forEach(function(x){
+      x.classList.toggle("active", x === s);
+    });
+    document.getElementById("now").textContent = "You're viewing: " + s.dataset.label;
+    if (s.dataset.page !== current){
+      current = s.dataset.page;
+      iframe.src = APP + "?page=" + current + "&embed=true";
+    }
+  });
+}, {rootMargin: "-45% 0px -55% 0px"});
+
+document.querySelectorAll(".step").forEach(function(s){ io.observe(s); });
+</script>
+</body>
+</html>

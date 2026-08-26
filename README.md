@@ -102,7 +102,7 @@ PART 2 - RESUME DESIGNER (how your resume is built)
                       |
                       v
                 [10] DOWNLOAD
-                    Provides resume in ".docx/.pdf/.txt" format for flexible uses
+                    Provides resume in ".docx/.pdf/.txt" format for flexible uses.
 
 
   LINK BETWEEN THE PARTS
