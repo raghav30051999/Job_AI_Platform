@@ -165,41 +165,43 @@ _SCORE_RE = re.compile(
 _YEAR_RE = re.compile(r"\d{4}\s*[-–]\s*\d{4}")
 
 
+def _norm_s(x):
+    return re.sub(r"[^a-z0-9]+", " ", (x or "").lower()).strip()
+
+
 def _strip_year_from_degree(degree):
-    """Remove embedded year ranges from degree text so 'B.Tech 2016-2020 — College'
-    matches 'B.Tech'."""
+    """Remove embedded year ranges from degree text."""
     if not degree:
         return degree
     cleaned = re.sub(r'\s*\d{4}\s*[-–]\s*\d{4}\s*', ' ', degree).strip()
     cleaned = re.sub(r'[\s,|;—–\-]+$', '', cleaned)
     return cleaned
 
-def _norm_s(x):
-    return re.sub(r"[^a-z0-9]+", " ", (x or "").lower()).strip()
 
 def _clean_entry(e):
-    """Normalize ONE education entry: split 'Degree — Institution | Score Year'
-    lines, extract score/year embedded in the degree, trim junk. Applied to ALL
-    candidates (parser + evidence + AI draft) so comparisons see clean fields."""
+    """Normalize ONE education entry: extract score/year from degree text,
+    split glued fields. Applied to ALL candidates (parser + evidence + AI draft)."""
     deg = str(e.get("degree") or "")
     inst = str(e.get("institution") or "")
     year = str(e.get("year") or "")
     score = str(e.get("score") or "")
 
+    # Extract year from degree if missing
     if not year:
         m = _YEAR_RE.search(deg)
         year = m.group(0) if m else ""
+    
+    # Extract score from degree if missing
     if not score:
         m = _SCORE_RE.search(deg)
         score = m.group(2) if m else ""
 
-    # strip score fragments ("CGPA: 7.28 / 10") and year ranges out of degree
+    # Strip score fragments and year ranges from degree
     deg = re.sub(r"(CGPA|GPA|Percentage|Percent|Grade|Marks)[^|,;—–\n]*", " ", deg, flags=re.I)
     deg = _YEAR_RE.sub(" ", deg)
     deg = re.sub(r"\s*/\s*\d+(?:\.\d+)?", " ", deg)
 
-    # if the institution is still glued onto the degree, cut at the last
-    # separator (— | , -) that appears before the institution keyword
+    # If institution is glued to degree, split at separator before institution keyword
     if not inst:
         m = _INST_KW.search(deg)
         if m:
@@ -211,7 +213,9 @@ def _clean_entry(e):
 
     deg = re.sub(r"[\s|,;—–-]+$", "", deg).strip()
     inst = re.sub(r"[\s|,;—–-]+$", "", inst).strip()
+    
     return {"degree": deg, "institution": inst, "year": year, "score": score}
+
 
 def _extract_education_block(profile_text):
     """Pull the raw EDUCATION section straight from the saved profile text."""
@@ -304,7 +308,7 @@ def _mergeable(a, b):
     sa, sb = a.get("score", ""), b.get("score", "")
     ya, yb = a.get("year", ""), b.get("year", "")
 
-    # Normalize AFTER stripping embedded years (this is the key fix)
+    # Normalize AFTER stripping embedded years
     da = _norm_s(_strip_year_from_degree(da_raw))
     db = _norm_s(_strip_year_from_degree(db_raw))
     ia_n, ib_n = _norm_s(ia), _norm_s(ib)
@@ -315,26 +319,23 @@ def _mergeable(a, b):
     if ia_n and ia_n == ib_n and (not da or not db or da == db):
         return True
 
-    # Same score AND same year = strong signal they're the same entry
+    # Same score AND same year
     if sa and sa == sb and ya and ya == yb:
-        # One has degree/institution, merge them
         if (da or ia_n) and not (db or ib_n):
             return True
         if (db or ib_n) and not (da or ia_n):
             return True
-        # Both have degree+institution, merge if compatible
         if (da or ia_n) and (db or ib_n):
             if (not da or not db or da == db) and (not ia_n or not ib_n or ia_n == ib_n):
                 return True
 
-    # Complementary fragments: one has degree, other has institution, share score or year
+    # Complementary fragments
     same_score = sa and sa == sb
     same_year = ya and ya == yb
     if (same_score or same_year) and ((not da) != (not db)) and ((not ia_n) != (not ib_n)):
         return True
 
     # Same year + same degree-keyword + compatible institution
-    # Catches "B.Tech, EEE 2016-2020 — Pragati" vs "B.Tech, EEE"
     if same_year:
         kw_a = _DEGREE_KW.search(da_raw or "")
         kw_b = _DEGREE_KW.search(db_raw or "")
@@ -345,31 +346,34 @@ def _mergeable(a, b):
 
     return False
 
+
 def _merge_into(target, source):
     for k in ("institution", "year", "score"):
         if not target[k]:
             target[k] = source[k]
-    # For degree: prefer the cleaner version (no embedded year, shorter)
+    # For degree: prefer cleaner version (no embedded year)
     if not target["degree"]:
         target["degree"] = source["degree"]
     elif source["degree"]:
         src_clean = _strip_year_from_degree(source["degree"])
         tgt_clean = _strip_year_from_degree(target["degree"])
-        # prefer the one without embedded year, or shorter after stripping
         if not _YEAR_RE.search(source["degree"]) and _YEAR_RE.search(target["degree"]):
             target["degree"] = source["degree"]
         elif len(src_clean) < len(tgt_clean) and len(src_clean) > 10:
             target["degree"] = source["degree"]
 
+
 def _final_education(draft, evidence):
-    """Single source of truth for education: parse raw profile + evidence + model
-    draft into canonical entries, then merge complementary fragments (no dupes)."""
+    """Single source of truth for education: parse raw profile + evidence + AI draft,
+    normalize ALL entries, merge complementary fragments, deduplicate."""
     sources = [_extract_education_block((get_profile() or {}).get("text", "")),
                "\n".join(e.get("text", "") for e in evidence
                          if e.get("section") == "education")]
     candidates = []
     for src in sources:
         candidates += _parse_edu_blocks(src)
+    
+    # Add AI draft entries
     for m in draft.get("education") or []:
         if isinstance(m, dict):
             candidates.append({k: str(m.get(k) or "") for k in
@@ -377,9 +381,11 @@ def _final_education(draft, evidence):
         elif isinstance(m, str) and m.strip():
             candidates.append({"degree": m.strip(), "institution": "",
                                "year": "", "score": ""})
-    # normalize EVERY candidate so parser/evidence/AI entries compare equal
+
+    # CRITICAL: normalize EVERY candidate so parser/evidence/AI entries compare equal
     candidates = [_clean_entry(c) for c in candidates]
 
+    # Merge complementary fragments
     out = []
     for c in candidates:
         if not (c["degree"] or c["institution"]):
@@ -391,6 +397,7 @@ def _final_education(draft, evidence):
         else:
             out.append(dict(c))
 
+    # Final dedup by normalized (degree, institution) key
     final, seen = [], set()
     for e in out:
         key = (_norm_s(e["degree"]), _norm_s(e["institution"]))
@@ -398,6 +405,7 @@ def _final_education(draft, evidence):
             continue
         seen.add(key)
         final.append(e)
+    
     if not final:
         return _norm_education(draft.get("education") or [])
     return final
