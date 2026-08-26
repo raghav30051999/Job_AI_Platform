@@ -256,18 +256,33 @@ def _parse_edu_blocks(text):
 def _mergeable(a, b):
     da, ia = _norm_s(a["degree"]), _norm_s(a["institution"])
     db, ib = _norm_s(b["degree"]), _norm_s(b["institution"])
+    sa, sb = a.get("score", ""), b.get("score", "")
+    ya, yb = a.get("year", ""), b.get("year", "")
+    
+    # Same degree + same institution (or one empty)
     if da and da == db and (not ia or not ib or ia == ib):
         return True
     if ia and ia == ib and (not da or not db or da == db):
         return True
-    same_score = a["score"] and a["score"] == b["score"]
-    same_year = a["year"] and a["year"] == b["year"]
-    # strict complement: one holds degree, the other institution
+    
+    # Same score AND same year = strong signal they're the same entry
+    if sa and sa == sb and ya and ya == yb:
+        # One has degree/institution, merge them
+        if (da or ia) and not (db or ib):
+            return True
+        if (db or ib) and not (da or ia):
+            return True
+        # Both have degree+institution, merge if compatible
+        if (da or ia) and (db or ib):
+            if (not da or not db or da == db) and (not ia or not ib or ia == ib):
+                return True
+    
+    # Complementary fragments: one has degree, other has institution, share score or year
+    same_score = sa and sa == sb
+    same_year = ya and ya == yb
     if (same_score or same_year) and ((not da) != (not db)) and ((not ia) != (not ib)):
         return True
-    # one side incomplete, the other carries the missing half, same score
-    if same_score and (da or db) and (ia or ib) and ((not da or not db) or (not ia or not ib)):
-        return True
+    
     return False
 
 
