@@ -173,8 +173,8 @@ def _strip_year_from_degree(degree):
     """Remove embedded year ranges from degree text."""
     if not degree:
         return degree
-    cleaned = re.sub(r'\s*\d{4}\s*[-–]\s*\d{4}\s*', ' ', degree).strip()
-    cleaned = re.sub(r'[\s,|;—–\-]+$', '', cleaned)
+    cleaned = re.sub(r"\s*\d{4}\s*[-–]\s*\d{4}\s*", " ", degree).strip()
+    cleaned = re.sub(r"[\s,|;—–\-]+$", "", cleaned)
     return cleaned
 
 
@@ -186,22 +186,20 @@ def _clean_entry(e):
     year = str(e.get("year") or "")
     score = str(e.get("score") or "")
 
-    # Extract year from degree if missing
     if not year:
         m = _YEAR_RE.search(deg)
         year = m.group(0) if m else ""
-    
-    # Extract score from degree if missing
     if not score:
         m = _SCORE_RE.search(deg)
         score = m.group(2) if m else ""
 
-    # Strip score fragments and year ranges from degree
+    # strip score fragments ("CGPA: 7.28 / 10") and year ranges out of degree
     deg = re.sub(r"(CGPA|GPA|Percentage|Percent|Grade|Marks)[^|,;—–\n]*", " ", deg, flags=re.I)
     deg = _YEAR_RE.sub(" ", deg)
     deg = re.sub(r"\s*/\s*\d+(?:\.\d+)?", " ", deg)
 
-    # If institution is glued to degree, split at separator before institution keyword
+    # if the institution is still glued onto the degree, cut at the last
+    # separator (— | , -) that appears before the institution keyword
     if not inst:
         m = _INST_KW.search(deg)
         if m:
@@ -213,7 +211,6 @@ def _clean_entry(e):
 
     deg = re.sub(r"[\s|,;—–-]+$", "", deg).strip()
     inst = re.sub(r"[\s|,;—–-]+$", "", inst).strip()
-    
     return {"degree": deg, "institution": inst, "year": year, "score": score}
 
 
@@ -372,7 +369,7 @@ def _final_education(draft, evidence):
     candidates = []
     for src in sources:
         candidates += _parse_edu_blocks(src)
-    
+
     # Add AI draft entries
     for m in draft.get("education") or []:
         if isinstance(m, dict):
@@ -382,7 +379,7 @@ def _final_education(draft, evidence):
             candidates.append({"degree": m.strip(), "institution": "",
                                "year": "", "score": ""})
 
-    # CRITICAL: normalize EVERY candidate so parser/evidence/AI entries compare equal
+    # normalize EVERY candidate so parser/evidence/AI entries compare equal
     candidates = [_clean_entry(c) for c in candidates]
 
     # Merge complementary fragments
@@ -397,10 +394,7 @@ def _final_education(draft, evidence):
         else:
             out.append(dict(c))
 
-    # Final dedup by normalized (degree, institution) key
-        def _degree_keyword(deg):
-        """Extract the degree keyword ('bachelor', 'master', 'ssc', etc.) for
-        loose matching across 'B.Tech' vs 'Bachelor of Technology' style variations."""
+    def _degree_keyword(deg):
         m = _DEGREE_KW.search(deg or "")
         return m.group(0).lower() if m else ""
 
@@ -413,24 +407,32 @@ def _final_education(draft, evidence):
         seen.add(key)
         final.append(e)
 
-    # Pass 2: aggressive fallback — same year + same degree-keyword = same entry
-    # Catches "B.Tech" vs "Bachelor of Technology" and other model variations
-    merged, seen2 = [], set()
+    # Pass 2: aggressive fallback — same degree-keyword + same year + compatible
+    # institution = same entry (catches "B.Tech" vs "Bachelor of Technology")
+    merged = []
     for e in final:
-        key = (_degree_keyword(e["degree"]), e.get("year", ""), _norm_s(e["institution"]))
-        if key in seen2 and key[0] and key[1]:
-            # merge this entry into the existing one and skip
+        kw = _degree_keyword(e["degree"])
+        yr = e.get("year", "")
+        inst = _norm_s(e["institution"])
+        placed = False
+        if kw and yr:
             for m in merged:
-                mk = (_degree_keyword(m["degree"]), m.get("year", ""), _norm_s(m["institution"]))
-                if mk == key:
+                mkw = _degree_keyword(m["degree"])
+                myr = m.get("year", "")
+                minst = _norm_s(m["institution"])
+                if mkw == kw and myr == yr and (not inst or not minst or inst == minst):
                     for k in ("degree", "institution", "year", "score"):
                         if not m[k]:
                             m[k] = e.get(k, "")
+                    placed = True
                     break
-            continue
-        seen2.add(key)
-        merged.append(e)
+        if not placed:
+            merged.append(e)
     final = merged
+
+    if not final:
+        return _norm_education(draft.get("education") or [])
+    return final
 
 
 # ---------------------------------------------------------------- main pipeline
