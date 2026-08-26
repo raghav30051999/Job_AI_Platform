@@ -164,6 +164,17 @@ _SCORE_RE = re.compile(
     r"(CGPA|GPA|Percentage|Percent|Grade|Marks)\s*[:\-]?\s*([\d.]+)\s*%?", re.I)
 _YEAR_RE = re.compile(r"\d{4}\s*[-–]\s*\d{4}")
 
+def _trim_junk(s, cut_pipe=False):
+    """Remove score/year junk from a field; optionally cut at first '|'."""
+    if not s:
+        return s
+    if cut_pipe:
+        s = s.split("|")[0]
+    s = re.sub(r"(CGPA|GPA|Percentage|Percent|Grade|Marks)\s*[:\-]?\s*[\d.]+(?:\s*/\s*\d+(?:\.\d+)?)?",
+               " ", s, flags=re.I)
+    s = _YEAR_RE.sub(" ", s)
+    return re.sub(r"[\s,;—–-]+$", "", s).strip()
+
 
 def _norm_s(x):
     return re.sub(r"[^a-z0-9]+", " ", (x or "").lower()).strip()
@@ -194,9 +205,9 @@ def _clean_entry(e):
         score = m.group(2) if m else ""
 
     # strip score fragments ("CGPA: 7.28 / 10") and year ranges out of degree
-    deg = re.sub(r"(CGPA|GPA|Percentage|Percent|Grade|Marks)[^|,;—–\n]*", " ", deg, flags=re.I)
-    deg = _YEAR_RE.sub(" ", deg)
-    deg = re.sub(r"\s*/\s*\d+(?:\.\d+)?", " ", deg)
+    deg = _trim_junk(deg)
+    inst = _trim_junk(inst, cut_pipe=True)
+    return {"degree": deg, "institution": inst, "year": year, "score": score}
 
     # if the institution is still glued onto the degree, cut at the last
     # separator (— | , -) that appears before the institution keyword
@@ -244,9 +255,9 @@ def _fields_from_block(blk):
     degree = inst = ""
     for l in lines:
         if not degree and _DEGREE_KW.search(l):
-            degree = l.rstrip(" ,|;-")
+            degree = _trim_junk(l)
         elif not inst and _INST_KW.search(l):
-            inst = l.rstrip(" ,|;-")
+            inst = _trim_junk(l, cut_pipe=True)
     if not degree and not inst and len(lines) == 1:
         parts = [p.strip() for p in re.split(r"[|,]", lines[0]) if p.strip()]
         for p in parts:
