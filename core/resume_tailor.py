@@ -398,6 +398,13 @@ def _final_education(draft, evidence):
             out.append(dict(c))
 
     # Final dedup by normalized (degree, institution) key
+        def _degree_keyword(deg):
+        """Extract the degree keyword ('bachelor', 'master', 'ssc', etc.) for
+        loose matching across 'B.Tech' vs 'Bachelor of Technology' style variations."""
+        m = _DEGREE_KW.search(deg or "")
+        return m.group(0).lower() if m else ""
+
+    # Pass 1: strict dedup by full normalized (degree, institution)
     final, seen = [], set()
     for e in out:
         key = (_norm_s(e["degree"]), _norm_s(e["institution"]))
@@ -405,10 +412,25 @@ def _final_education(draft, evidence):
             continue
         seen.add(key)
         final.append(e)
-    
-    if not final:
-        return _norm_education(draft.get("education") or [])
-    return final
+
+    # Pass 2: aggressive fallback — same year + same degree-keyword = same entry
+    # Catches "B.Tech" vs "Bachelor of Technology" and other model variations
+    merged, seen2 = [], set()
+    for e in final:
+        key = (_degree_keyword(e["degree"]), e.get("year", ""), _norm_s(e["institution"]))
+        if key in seen2 and key[0] and key[1]:
+            # merge this entry into the existing one and skip
+            for m in merged:
+                mk = (_degree_keyword(m["degree"]), m.get("year", ""), _norm_s(m["institution"]))
+                if mk == key:
+                    for k in ("degree", "institution", "year", "score"):
+                        if not m[k]:
+                            m[k] = e.get(k, "")
+                    break
+            continue
+        seen2.add(key)
+        merged.append(e)
+    final = merged
 
 
 # ---------------------------------------------------------------- main pipeline

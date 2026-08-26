@@ -1377,6 +1377,9 @@ def _render_tailor(res):
 def render():
     if st.session_state.pop("clear_profile_box", False):
         st.session_state["profile_text"] = ""
+
+    BUILD = "v0825a"   # ← bump this with every code change
+    st.caption(f"🔧 tailor build: **{BUILD}**")
     if st.session_state.pop("load_sample", False):
         st.session_state["profile_text"] = SAMPLE_PROFILE
 
