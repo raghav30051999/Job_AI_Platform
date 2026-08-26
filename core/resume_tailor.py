@@ -360,6 +360,13 @@ def _merge_into(target, source):
             target["degree"] = source["degree"]
 
 
+def _degree_keyword(deg):
+    """Extract the degree keyword for loose matching across
+    'B.Tech' vs 'Bachelor of Technology' style variations."""
+    m = _DEGREE_KW.search(deg or "")
+    return m.group(0).lower() if m else ""
+
+
 def _final_education(draft, evidence):
     """Single source of truth for education: parse raw profile + evidence + AI draft,
     normalize ALL entries, merge complementary fragments, deduplicate."""
@@ -370,7 +377,6 @@ def _final_education(draft, evidence):
     for src in sources:
         candidates += _parse_edu_blocks(src)
 
-    # Add AI draft entries
     for m in draft.get("education") or []:
         if isinstance(m, dict):
             candidates.append({k: str(m.get(k) or "") for k in
@@ -382,7 +388,6 @@ def _final_education(draft, evidence):
     # normalize EVERY candidate so parser/evidence/AI entries compare equal
     candidates = [_clean_entry(c) for c in candidates]
 
-    # Merge complementary fragments
     out = []
     for c in candidates:
         if not (c["degree"] or c["institution"]):
@@ -394,10 +399,6 @@ def _final_education(draft, evidence):
         else:
             out.append(dict(c))
 
-    def _degree_keyword(deg):
-        m = _DEGREE_KW.search(deg or "")
-        return m.group(0).lower() if m else ""
-
     # Pass 1: strict dedup by full normalized (degree, institution)
     final, seen = [], set()
     for e in out:
@@ -407,27 +408,22 @@ def _final_education(draft, evidence):
         seen.add(key)
         final.append(e)
 
-    # Pass 2: aggressive fallback — same degree-keyword + same year + compatible
-    # institution = same entry (catches "B.Tech" vs "Bachelor of Technology")
-    merged = []
+    # Pass 2: aggressive fallback — same year + same degree-keyword + compatible
+    # institution = same entry (catches model wording variations)
+    merged, seen2 = [], set()
     for e in final:
-        kw = _degree_keyword(e["degree"])
-        yr = e.get("year", "")
-        inst = _norm_s(e["institution"])
-        placed = False
-        if kw and yr:
+        key = (_degree_keyword(e["degree"]), e.get("year", ""), _norm_s(e["institution"]))
+        if key in seen2 and key[0] and key[1]:
             for m in merged:
-                mkw = _degree_keyword(m["degree"])
-                myr = m.get("year", "")
-                minst = _norm_s(m["institution"])
-                if mkw == kw and myr == yr and (not inst or not minst or inst == minst):
+                mk = (_degree_keyword(m["degree"]), m.get("year", ""), _norm_s(m["institution"]))
+                if mk == key:
                     for k in ("degree", "institution", "year", "score"):
                         if not m[k]:
                             m[k] = e.get(k, "")
-                    placed = True
                     break
-        if not placed:
-            merged.append(e)
+            continue
+        seen2.add(key)
+        merged.append(e)
     final = merged
 
     if not final:
