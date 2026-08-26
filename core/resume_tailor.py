@@ -177,6 +177,42 @@ def _strip_year_from_degree(degree):
 def _norm_s(x):
     return re.sub(r"[^a-z0-9]+", " ", (x or "").lower()).strip()
 
+def _clean_entry(e):
+    """Normalize ONE education entry: split 'Degree — Institution | Score Year'
+    lines, extract score/year embedded in the degree, trim junk. Applied to ALL
+    candidates (parser + evidence + AI draft) so comparisons see clean fields."""
+    deg = str(e.get("degree") or "")
+    inst = str(e.get("institution") or "")
+    year = str(e.get("year") or "")
+    score = str(e.get("score") or "")
+
+    if not year:
+        m = _YEAR_RE.search(deg)
+        year = m.group(0) if m else ""
+    if not score:
+        m = _SCORE_RE.search(deg)
+        score = m.group(2) if m else ""
+
+    # strip score fragments ("CGPA: 7.28 / 10") and year ranges out of degree
+    deg = re.sub(r"(CGPA|GPA|Percentage|Percent|Grade|Marks)[^|,;—–\n]*", " ", deg, flags=re.I)
+    deg = _YEAR_RE.sub(" ", deg)
+    deg = re.sub(r"\s*/\s*\d+(?:\.\d+)?", " ", deg)
+
+    # if the institution is still glued onto the degree, cut at the last
+    # separator (— | , -) that appears before the institution keyword
+    if not inst:
+        m = _INST_KW.search(deg)
+        if m:
+            seps = [i for i in range(m.start()) if deg[i] in "—|,-"]
+            if seps:
+                cut = seps[-1]
+                inst = deg[cut + 1:].strip()
+                deg = deg[:cut].strip()
+
+    deg = re.sub(r"[\s|,;—–-]+$", "", deg).strip()
+    inst = re.sub(r"[\s|,;—–-]+$", "", inst).strip()
+    return {"degree": deg, "institution": inst, "year": year, "score": score}
+
 def _extract_education_block(profile_text):
     """Pull the raw EDUCATION section straight from the saved profile text."""
     lines = (profile_text or "").split("\n")
@@ -341,6 +377,8 @@ def _final_education(draft, evidence):
         elif isinstance(m, str) and m.strip():
             candidates.append({"degree": m.strip(), "institution": "",
                                "year": "", "score": ""})
+    # normalize EVERY candidate so parser/evidence/AI entries compare equal
+    candidates = [_clean_entry(c) for c in candidates]
 
     out = []
     for c in candidates:
